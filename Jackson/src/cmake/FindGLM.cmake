@@ -35,7 +35,7 @@ SET(_glm_HEADER_SEARCH_DIRS
     "/usr/local/include")
 
 # check environment variable
-SET(_glm_ENV_ROOT_DIR "$ENV{GLM_ROOT_DIR}")
+SET(_glm_ENV_ROOT_DIR "${GLM_ROOT_DIR}")
 
 IF(NOT GLM_ROOT_DIR AND _glm_ENV_ROOT_DIR)
     SET(GLM_ROOT_DIR "${_glm_ENV_ROOT_DIR}")

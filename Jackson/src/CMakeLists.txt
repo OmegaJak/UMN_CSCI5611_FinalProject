@@ -2,6 +2,7 @@ cmake_minimum_required (VERSION 2.6)
 project(SoundSim-target)
 
 set(SDL2_DIR "extern/SDL2")
+set(GLM_ROOT_DIR "extern/glm")
 set(ASSETS_DIR "${CMAKE_SOURCE_DIR}/assets")
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/cmake)

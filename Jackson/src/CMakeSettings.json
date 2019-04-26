@@ -1,9 +1,4 @@
 ﻿{
-  "environments": [
-    {
-      "GLM_ROOT_DIR": ".\\extern\\glm"
-    }
-  ],
   "configurations": [
     {
       "name": "x64-Debug",
