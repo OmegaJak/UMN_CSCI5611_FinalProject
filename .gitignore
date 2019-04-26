@@ -21,6 +21,7 @@ CMakeCache.txt
 # Compiled Dynamic libraries
 *.so
 *.dylib
+*.dll
 
 # Fortran module files
 *.mod
@@ -30,10 +31,7 @@ CMakeCache.txt
 *.lai
 *.la
 *.a
-
 *.lib
-!**/src/extern/SDL2/lib/x64/*
-*.dll
 
 # Executables
 *.exe
@@ -50,6 +48,3 @@ CMakeCache.txt
 *.idb
 *.ipdb
 *.iobj
-
-
-
