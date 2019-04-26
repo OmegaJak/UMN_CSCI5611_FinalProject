@@ -4,7 +4,6 @@ CMakeCache.txt
 **/Release/*
 **/Debug/*
 **/build/*
-*.cmake
 **/application.windows**
 
 # Prerequisites
