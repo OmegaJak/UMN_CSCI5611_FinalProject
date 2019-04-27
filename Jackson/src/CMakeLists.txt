@@ -1,7 +1,7 @@
 cmake_minimum_required (VERSION 2.6)
 project(SoundSim-target)
 
-set(SDL2_DIR "${CMAKE_SOURCE_DIR}extern/SDL2")
+set(SDL2_DIR "${CMAKE_SOURCE_DIR}/extern/SDL2")
 set(GLM_ROOT_DIR "${CMAKE_SOURCE_DIR}/extern/glm")
 set(ASSETS_DIR "${CMAKE_SOURCE_DIR}/assets")
 
@@ -26,7 +26,7 @@ file(GLOB SoundSim_SRC
 include_directories(
 	"./src"
 	"./extern/SDL2/include"
-	)
+)
 
 add_executable(SoundSim-target
   extern/glad/glad.c
@@ -40,6 +40,7 @@ target_include_directories(SoundSim-target PUBLIC
 message("Output directory: ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}")
 message("SDL2_IMAGE_INCLUDE_DIRS: ${SDL2_IMAGE_INCLUDE_DIRS}")
 message("SDL2_IMAGE_LIBRARIES: ${SDL2_IMAGE_LIBRARIES}")
+message("SDL2_INCLUDE_DIRS: ${SDL2_INCLUDE_DIRS}")
 
 target_link_libraries(SoundSim-target
   ${SDL2_LIBRARIES} ${SDL2_IMAGE_LIBRARIES}

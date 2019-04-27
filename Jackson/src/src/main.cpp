@@ -35,13 +35,8 @@ const char* INSTRUCTIONS =
     "***************\n";
 
 #include "glad.h"  //Include order can matter here
-#if defined(__APPLE__) || defined(__linux__)
 #include <SDL.h>
 #include <SDL_opengl.h>
-#else
-#include <SDL.h>
-#include <SDL_opengl.h>
-#endif
 #include <cstdio>
 #include <string>
 
@@ -174,7 +169,7 @@ int main(int argc, char* argv[]) {
 
     // Load OpenGL extentions with GLAD
 	//if (gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)){
-    if (gladLoadGLLoader(SDL_GL_GetProcAddress)) {
+    if (gladLoadGL()) {
         printf("\nOpenGL loaded\n");
         printf("Vendor:   %s\n", glGetString(GL_VENDOR));
         printf("Renderer: %s\n", glGetString(GL_RENDERER));
