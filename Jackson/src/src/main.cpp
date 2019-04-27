@@ -36,8 +36,8 @@ const char* INSTRUCTIONS =
 
 #include "glad.h"  //Include order can matter here
 #if defined(__APPLE__) || defined(__linux__)
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_opengl.h>
+#include <SDL.h>
+#include <SDL_opengl.h>
 #else
 #include <SDL.h>
 #include <SDL_opengl.h>
@@ -173,6 +173,7 @@ int main(int argc, char* argv[]) {
     // SDL_SetRelativeMouseMode(SDL_TRUE);  // 'grab' the mouse
 
     // Load OpenGL extentions with GLAD
+	//if (gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)){
     if (gladLoadGLLoader(SDL_GL_GetProcAddress)) {
         printf("\nOpenGL loaded\n");
         printf("Vendor:   %s\n", glGetString(GL_VENDOR));

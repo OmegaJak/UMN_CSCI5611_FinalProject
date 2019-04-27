@@ -53,7 +53,9 @@ class ClothManager {
     static const int WORK_GROUP_SIZE = 128;
 
     static const int NUM_THREADS = 128;
-    static const int MASSES_PER_THREAD = 180;
+    enum{
+        MASSES_PER_THREAD = 180
+    };
     static const int NUM_MASSES = NUM_THREADS * MASSES_PER_THREAD;
 
     static const int CLOTH_WIDTH = 32;

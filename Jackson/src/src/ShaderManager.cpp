@@ -51,7 +51,7 @@ void ShaderManager::InitEnvironmentShaderAttributes() {
     glBindVertexArray(EnvironmentShader.VAO);      // Bind the above created VAO to the current context
 
     GLint posAttrib = glGetAttribLocation(EnvironmentShader.Program, "position");
-    glVertexAttribPointer(posAttrib, VALUES_PER_POSITION, GL_FLOAT, GL_FALSE, ATTRIBUTE_STRIDE * sizeof(float), POSITION_OFFSET);
+    glVertexAttribPointer(posAttrib, VALUES_PER_POSITION, GL_FLOAT, GL_FALSE, ATTRIBUTE_STRIDE * sizeof(float), &POSITION_OFFSET);
     // Attribute, vals/attrib., type, isNormalized, stride, offset
     glEnableVertexAttribArray(posAttrib);
 

@@ -5,6 +5,8 @@ CMakeCache.txt
 **/Debug/*
 **/build/*
 **/application.windows**
+.DS_Store
+*.swp
 
 # Prerequisites
 *.d
