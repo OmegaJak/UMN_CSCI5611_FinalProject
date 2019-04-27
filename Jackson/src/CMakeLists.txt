@@ -16,7 +16,6 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 find_package(GLM REQUIRED)
 find_package(SDL2 REQUIRED)
 find_package(SDL2_image REQUIRED)
-
 # Automatically find all source files
 file(GLOB SoundSim_SRC
 	"src/*.h"
@@ -25,7 +24,6 @@ file(GLOB SoundSim_SRC
 
 include_directories(
 	"./src"
-	"./extern/SDL2/include"
 )
 
 add_executable(SoundSim-target
@@ -37,10 +35,12 @@ target_include_directories(SoundSim-target PUBLIC
   ${GLM_INCLUDE_DIRS} ${SDL2_INCLUDE_DIRS} ${SDL2_IMAGE_INCLUDE_DIRS} "./extern/glad"
 )
 
+
 message("Output directory: ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}")
 message("SDL2_IMAGE_INCLUDE_DIRS: ${SDL2_IMAGE_INCLUDE_DIRS}")
 message("SDL2_IMAGE_LIBRARIES: ${SDL2_IMAGE_LIBRARIES}")
 message("SDL2_INCLUDE_DIRS: ${SDL2_INCLUDE_DIRS}")
+message("SDL2_LIBRARIES: ${SDL2_LIBRARIES}")
 
 target_link_libraries(SoundSim-target
   ${SDL2_LIBRARIES} ${SDL2_IMAGE_LIBRARIES}

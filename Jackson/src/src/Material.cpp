@@ -1,4 +1,4 @@
-#include "material.h"
+#include "Material.h"
 
 Material::Material() : Material(glm::vec3(0, 1, 0)) {}
 
