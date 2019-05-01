@@ -36,6 +36,9 @@ target_include_directories(SoundSim-target PUBLIC
   ${GLM_INCLUDE_DIRS} ${SDL2_INCLUDE_DIRS} ${SDL2_IMAGE_INCLUDE_DIRS} "./extern/glad"
 )
 
+#if(MSVC)
+#    set_property(TARGET SoundSim-target APPEND PROPERTY LINK_FLAGS /PROFILE)
+#endif()
 
 message("Output directory: ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}")
 message("SDL2_IMAGE_INCLUDE_DIRS: ${SDL2_IMAGE_INCLUDE_DIRS}")

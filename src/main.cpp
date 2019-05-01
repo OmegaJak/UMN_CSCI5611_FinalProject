@@ -15,6 +15,8 @@
 #include "Environment.h"
 #include "GameObject.h"
 #include "ShaderManager.h"
+#include "SoundManager.h"
+#include "StringSim.h"
 #include "TextureManager.h"
 const char* INSTRUCTIONS =
     "***************\n"
@@ -34,13 +36,14 @@ const char* INSTRUCTIONS =
     "F11 - Fullscreen\n"
     "***************\n";
 
-#include "glad.h"  //Include order can matter here
 #include <SDL.h>
 #include <SDL_opengl.h>
+
 #include <cstdio>
 #include <string>
 
 #include "ModelManager.h"
+#include "glad.h"  //Include order can matter here
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
 #include "glm/gtc/type_ptr.hpp"
@@ -144,7 +147,9 @@ void GLAPIENTRY glDebugOutput(GLenum source, GLenum type, GLuint id, GLenum seve
 }
 
 int main(int argc, char* argv[]) {
-    SDL_Init(SDL_INIT_VIDEO);  // Initialize Graphics (for OpenGL)
+    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) != 0) {  // Initialize Graphics (for OpenGL)
+        printf("Unable to initialize SDL: %s\n", SDL_GetError());
+    }
 
     // Ask SDL to get a recent version of OpenGL (3.2 or greater)
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
@@ -168,7 +173,7 @@ int main(int argc, char* argv[]) {
     // SDL_SetRelativeMouseMode(SDL_TRUE);  // 'grab' the mouse
 
     // Load OpenGL extentions with GLAD
-	//if (gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)){
+    // if (gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)){
     if (gladLoadGL()) {
         printf("\nOpenGL loaded\n");
         printf("Vendor:   %s\n", glGetString(GL_VENDOR));
@@ -197,6 +202,10 @@ int main(int argc, char* argv[]) {
     Environment environment = Environment();
 
     ClothManager clothManager = ClothManager();
+
+    SoundManager soundManager = SoundManager(48000);
+    auto stringParams = StringParameters{50000, 0.3, 0.848, 0.755};
+    StringSim stringSim = StringSim(stringParams, 30, &soundManager);
 
     ShaderManager::InitShaders();
 
@@ -240,6 +249,8 @@ int main(int argc, char* argv[]) {
                     if (windowEvent.key.keysym.sym == SDLK_MINUS) modAmount *= -1;
 
                     gravityCenterDistance += modAmount;
+                } else if (windowEvent.key.keysym.sym == SDLK_t) {
+                    stringSim.Pluck(0.6);
                 }
             } else if (windowEvent.type == SDL_KEYDOWN) {
                 if (windowEvent.key.keysym.sym == SDLK_SPACE) {
@@ -291,6 +302,8 @@ int main(int argc, char* argv[]) {
             lastFramesTimer = 0;
         }
 
+        stringSim.Update(0.0001, 2000, true);
+
         // Rendering //
         float gray = 0.6f;
         glClearColor(gray, gray, gray, 1.0f);  // Clear the screen to default color
@@ -319,20 +332,12 @@ int main(int argc, char* argv[]) {
                   << " | Sim running: " << (clothManager.simParameters.dt > 0);
         SDL_SetWindowTitle(window, debugText.str().c_str());
 
-        // Simulate using compute shader
-        clothManager.ExecuteComputeShader();
-
         // Render the environment
         ShaderManager::ActivateShader(ShaderManager::EnvironmentShader);
         glBindBuffer(GL_ARRAY_BUFFER, ShaderManager::EnvironmentShader.VBO);
         TextureManager::Update(ShaderManager::EnvironmentShader.Program);
         environment.UpdateAll();
         glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-        // Render particles!!
-        // ShaderManager::ActivateShader(ShaderManager::ClothShader);
-        // TextureManager::Update(ShaderManager::ClothShader.Program);
-        clothManager.RenderParticles(deltaTime, &environment);
 
         SDL_GL_SwapWindow(window);  // Double buffering
     }
@@ -341,6 +346,7 @@ int main(int argc, char* argv[]) {
     ShaderManager::Cleanup();
     ModelManager::Cleanup();
 
+    SDL_CloseAudio();
     SDL_GL_DeleteContext(context);
     IMG_Quit();
     SDL_Quit();
