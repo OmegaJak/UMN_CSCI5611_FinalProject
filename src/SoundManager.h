@@ -10,5 +10,5 @@ class SoundManager {
     static float soundBuff[soundBuffSize];
     static int lastSimulationSampleIndex;
     static int lastSampleIndex;
-    static const short ToneVolume = 4000;
+    static const short ToneVolume = 2000;
 };

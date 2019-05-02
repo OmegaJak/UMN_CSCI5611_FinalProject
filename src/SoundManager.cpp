@@ -30,23 +30,21 @@ void square_wave_callback(void* _beeper, Uint8* _stream, int _len) {
 void SoundManager::InitSound(int samplesPerSecond) {
     SDL_AudioSpec desiredSpec;
 
+    SDL_zero(desiredSpec);
     desiredSpec.freq = samplesPerSecond;
     desiredSpec.format = AUDIO_S16SYS;
     desiredSpec.channels = 1;
     desiredSpec.samples = 2048;
     desiredSpec.callback = audio_callback;
 
-    SDL_AudioSpec obtainedSpec;
-
-    // I think this can return error codes we should be checking
-    if (SDL_OpenAudio(&desiredSpec, NULL) < 0) {
-        printf("Failed to open audio\n");
-        // return -1;
+    // Code isn't resilient to the spec being changed so make SDL convert appropriately
+    SDL_AudioDeviceID device = SDL_OpenAudioDevice(nullptr, false, &desiredSpec, nullptr, 0);
+    if (device == 0) {
+        printf("Failed to open audio %s\n", SDL_GetError());
     }
-    // TODO: Use newer OpenAudioDevice https://wiki.libsdl.org/SDL_OpenAudioDevice
 
     // start playing audio (unpause)
-    SDL_PauseAudio(0);
+    SDL_PauseAudioDevice(device, 0);
 
     // Zero things
     lastSimulationSampleIndex = 0;
