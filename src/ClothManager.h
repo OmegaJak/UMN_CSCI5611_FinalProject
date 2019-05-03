@@ -5,12 +5,13 @@
 class Environment;
 
 struct simParams {
-    GLfloat obstacleCenterX, obstacleCenterY, obstacleCenterZ;
-    GLfloat obstacleRadius;
     GLfloat dt;
     GLfloat ks;
     GLfloat kd;
     GLfloat restLength;
+    GLint numSamplesToGenerate;
+    GLuint micPosition;
+    GLuint micSpread;
 };
 
 struct position {
@@ -21,22 +22,14 @@ struct velocity {
     GLfloat vx, vy, vz, vw;
 };
 
-struct normal {
-    GLfloat nx, ny, nz, nw;
-};
-
 struct massConnections {
-    GLuint left, right, up, down;
+    GLuint left, right;
 };
 
 struct massParams {
     GLboolean isFixed;
     GLfloat mass;
     massConnections connections;
-};
-
-struct texcoord {
-    GLfloat u, v;
 };
 
 class ClothManager {
@@ -47,32 +40,21 @@ class ClothManager {
     void InitGL();
     void UpdateComputeParameters() const;
     void ExecuteComputeShader();
-    static void InitClothTexcoords();
-    static void InitClothIBO();
+    void Pluck(float strength = 0.1, int location = -1);
+    static void CopySamplesToAudioBuffer();
 
-    static const int WORK_GROUP_SIZE = 128;
-
-    static const int NUM_THREADS = 128;
-    enum{
-        MASSES_PER_THREAD = 180
-    };
-    static const int NUM_MASSES = NUM_THREADS * MASSES_PER_THREAD;
-
-    static const int CLOTH_WIDTH = 32;
-    static const int CLOTH_HEIGHT = 32;
-    static const int CLOTH_WEIGHT = 25;
-
-    static const int TRIANGLES_PER_THREAD = (2 * (MASSES_PER_THREAD - 1));
-    static const int NUM_TRIANGLES = TRIANGLES_PER_THREAD * (NUM_THREADS - 1);
-    static const int NUM_TRIANGLE_INDICES = NUM_TRIANGLES * 3;
+    static const int WORK_GROUP_SIZE = 32;
+    static const int NUM_MASSES = 32;
+    static const int SAMPLES_BUFFER_SIZE = 4000;
+    constexpr static const float BASE_HEIGHT = 20.0f;
 
     static GLuint posSSbo;
     static GLuint velSSbo;
-    static GLuint normSSbo;
-    static GLuint newVelSSbo;
+    static GLuint accelSSbo;
+    static GLuint samplesSSbo;
     static GLuint massSSbo;
     static GLuint paramSSbo;
-    static GLuint lastPosSSbo;
 
-    simParams simParameters;
+    simParams simParameters{};
+    static bool ready;
 };

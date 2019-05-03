@@ -1,20 +1,20 @@
 #include <fstream>
+
 #include "ClothManager.h"
 #include "Constants.h"
 #include "ModelManager.h"
 #include "ShaderManager.h"
 
 GLuint ShaderManager::ClothComputeShader;
-GLuint ShaderManager::ClothComputeStage;
 RenderShader ShaderManager::EnvironmentShader;
 RenderShader ShaderManager::ClothShader;
 
 std::map<int, std::function<void(ShaderAttributes)>> ShaderManager::ShaderFunctions;
 
 void ShaderManager::InitShaders() {
-    ClothShader.Program = EnvironmentShader.Program = CompileRenderShader("environment-Vertex.glsl", "environment-Fragment.glsl");
+    EnvironmentShader.Program = CompileRenderShader("environment-Vertex.glsl", "environment-Fragment.glsl");
+    ClothShader.Program = CompileRenderShader("cloth-Vertex.glsl", "cloth-Fragment.glsl");
     ClothComputeShader = CompileComputeShaderProgram("clothComputeShader.glsl");
-    ClothComputeStage = glGetUniformLocation(ClothComputeShader, "computationStage");
 
     InitEnvironmentShaderAttributes();
     InitClothShaderAttributes();
@@ -51,7 +51,8 @@ void ShaderManager::InitEnvironmentShaderAttributes() {
     glBindVertexArray(EnvironmentShader.VAO);      // Bind the above created VAO to the current context
 
     GLint posAttrib = glGetAttribLocation(EnvironmentShader.Program, "position");
-    glVertexAttribPointer(posAttrib, VALUES_PER_POSITION, GL_FLOAT, GL_FALSE, ATTRIBUTE_STRIDE * sizeof(float), (void *)(POSITION_OFFSET * sizeof(float)));
+    glVertexAttribPointer(posAttrib, VALUES_PER_POSITION, GL_FLOAT, GL_FALSE, ATTRIBUTE_STRIDE * sizeof(float),
+                          (void*)(POSITION_OFFSET * sizeof(float)));
     // Attribute, vals/attrib., type, isNormalized, stride, offset
     glEnableVertexAttribArray(posAttrib);
 
@@ -90,21 +91,8 @@ void ShaderManager::InitClothShaderAttributes() {
     glEnableVertexAttribArray(posAttrib);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, ClothManager::normSSbo);
-    glBindBuffer(GL_ARRAY_BUFFER, ClothManager::normSSbo);
-    GLint normAttrib = glGetAttribLocation(ClothShader.Program, "inNormal");
-    glVertexAttribPointer(normAttrib, 3, GL_FLOAT, GL_FALSE, sizeof(normal), (void*)0);
-    glEnableVertexAttribArray(normAttrib);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-    ClothManager::InitClothTexcoords();
-
     ClothShader.Attributes.position = posAttrib;
-    ClothShader.Attributes.normals = normAttrib;
-    // ClothShader.Attributes.texCoord = texAttrib;
-
     InitShaderUniforms(ClothShader);
-    ClothManager::InitClothIBO();
 
     glBindVertexArray(0);  // Unbind the VAO in case we want to create a new one
 }

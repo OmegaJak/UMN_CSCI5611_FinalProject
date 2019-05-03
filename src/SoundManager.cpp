@@ -1,5 +1,6 @@
 #include <fstream>
 
+#include "ClothManager.h"
 #include "SDL.h"
 #include "SoundManager.h"
 
@@ -56,6 +57,10 @@ void SoundManager::InitSound(int samplesPerSecond) {
 void audio_callback(void* beeper_, Uint8* stream_, int len_) {
     short* stream = (short*)stream_;
     int len = len_ / 2;
+
+    if (ClothManager::ready) {
+        ClothManager::CopySamplesToAudioBuffer();
+    }
 
     // TODO: Write what comes from string sim to wav file
     for (int i = 0; i < len; i++) {

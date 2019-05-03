@@ -250,7 +250,7 @@ int main(int argc, char* argv[]) {
 
                     gravityCenterDistance += modAmount;
                 } else if (windowEvent.key.keysym.sym == SDLK_t) {
-                    stringSim.Pluck(0.6);
+                    clothManager.Pluck(1.0);
                 }
             } else if (windowEvent.type == SDL_KEYDOWN) {
                 if (windowEvent.key.keysym.sym == SDLK_SPACE) {
@@ -302,7 +302,7 @@ int main(int argc, char* argv[]) {
             lastFramesTimer = 0;
         }
 
-        stringSim.Update(0.0001, 2000, true);
+        // stringSim.Update(0.0001, 2000, true);
 
         // Rendering //
         float gray = 0.6f;
@@ -318,19 +318,17 @@ int main(int argc, char* argv[]) {
         if (SDL_GetMouseState(NULL, NULL) & SDL_BUTTON(SDL_BUTTON_LEFT) & ~SDL_BUTTON(SDL_BUTTON_RIGHT)) {
             lastMouseWorldCoord = camera.GetMousePosition(normalizedMouseX, normalizedMouseY, proj, gravityCenterDistance);
             environment.SetGravityCenterPosition(lastMouseWorldCoord);
-            clothManager.simParameters.obstacleCenterX = lastMouseWorldCoord.x;
-            clothManager.simParameters.obstacleCenterY = lastMouseWorldCoord.y;
-            clothManager.simParameters.obstacleCenterZ = lastMouseWorldCoord.z;
         }
 
         stringstream debugText;
-        debugText << fixed << setprecision(3) << COMPUTES_PER_FRAME << " steps per frame, " << ClothManager::NUM_THREADS << "x"
-                  << ClothManager::MASSES_PER_THREAD << " masses "
-                  << " | " << lastAverageFrameTime << " per frame (" << lastFramerate << "FPS) average over " << framesPerSample
-                  << " frames "
+        debugText << fixed << setprecision(3) << " | " << lastAverageFrameTime << " per frame (" << lastFramerate << "FPS) average over "
+                  << framesPerSample << " frames "
                   << " | cameraPosition: " << camera.GetPosition() << " | CoG position: " << lastMouseWorldCoord
                   << " | Sim running: " << (clothManager.simParameters.dt > 0);
         SDL_SetWindowTitle(window, debugText.str().c_str());
+
+        // Simulate using compute shader
+        clothManager.ExecuteComputeShader();
 
         // Render the environment
         ShaderManager::ActivateShader(ShaderManager::EnvironmentShader);
@@ -338,6 +336,9 @@ int main(int argc, char* argv[]) {
         TextureManager::Update(ShaderManager::EnvironmentShader.Program);
         environment.UpdateAll();
         glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+        ShaderManager::ActivateShader(ShaderManager::ClothShader);
+        clothManager.RenderParticles(deltaTime, &environment);
 
         SDL_GL_SwapWindow(window);  // Double buffering
     }

@@ -12,20 +12,16 @@ layout(std140, binding = 2) buffer Vel {
     vec4 Velocities[];
 };
 
-layout(std140, binding = 3) buffer Norms {
-    vec4 Normals[];
+layout(std430, binding = 3) buffer SampleBuff {
+	float SamplesBuffer[];
 };
 
 layout(std140, binding = 5) buffer Accel {
     vec4 Accelerations[];
 };
 
-layout(std140, binding = 7) buffer LastPos {
-    vec4 LastPositions[];
-};
-
 struct Connections {
-    uint left, right, up, down;
+    uint left, right;
 };
 
 struct MassParams {
@@ -39,20 +35,21 @@ layout(std430, binding = 6) buffer MssPrps {
 };
 
 layout(std430, binding = 4) buffer Parameters {
-    vec3 obstacleCenter;
-    float obstacleRadius;
     float dt;
     float ks;
     float kd;
     float restLength;
+	int numSamplesToGenerate;
+	uint micPosition;
+	uint micSpread;
 };
 
-uniform int computationStage;
-
-layout(local_size_x = 128, local_size_y = 1, local_size_z = 1) in;
+layout(local_size_x = 32, local_size_y = 1, local_size_z = 1) in;
 
 uint gid;
-const vec3 gravity = vec3(0, 0, -9.8);
+const vec3 gravity = vec3(0, 0, 0);
+
+layout(binding = 7) uniform atomic_uint index;
 
 // I'm rather sad that I need this.
 // Because I need to be able to use both gid and the connection index as inputs, getAccelerationFromSpringConnection takes uints
@@ -73,9 +70,9 @@ vec3 getSpringAcceleration(vec3 p1, vec3 v1, float m1, vec3 p2, vec3 v2) {
     vec3 toMassOneFromTwo = p1 - p2;
     float length = length(toMassOneFromTwo);
     if (length == 0) {
-        toMassOneFromTwo = vec3(0, 0, 1);
+        toMassOneFromTwo = vec3(0, 1, 0);
     } else {
-        toMassOneFromTwo = toMassOneFromTwo / length;
+        toMassOneFromTwo = toMassOneFromTwo / length; // Normalize the direction of the force
     }
 
     float dampV1 = dot(toMassOneFromTwo, v1);
@@ -124,7 +121,7 @@ vec3 getAccelerationFromSpringConnection(uint massOne, uint massTwo) {
     if (massOne == BAD_INDEX || massTwo == BAD_INDEX) return vec3(0, 0, 0);
     vec3 originalPosition = Positions[massOne].xyz;
     vec3 originalVelocity = Velocities[massOne].xyz;
-    float mass = MassParameters[massOne].mass;
+    float mass = 10;
     vec3 p2 = Positions[massTwo].xyz;
     vec3 v2 = Velocities[massTwo].xyz;
 
@@ -139,91 +136,46 @@ vec3 getAccelerationFromSpringConnection(uint massOne, uint massTwo) {
 void CalculateForces() {
     vec3 leftAcc = getAccelerationFromSpringConnection(gid, MassParameters[gid].connections.left);
     vec3 rightAcc = getAccelerationFromSpringConnection(gid, MassParameters[gid].connections.right);
-    vec3 upAcc = getAccelerationFromSpringConnection(gid, MassParameters[gid].connections.up);
-    vec3 downAcc = getAccelerationFromSpringConnection(gid, MassParameters[gid].connections.down);
 
-    vec3 acc = gravity + leftAcc + rightAcc + upAcc + downAcc;
+    vec3 acc = gravity + leftAcc + rightAcc;
 
     // 'Drag'
-    float amt = dot(Normals[gid].xyz, Velocities[gid].xyz);
-    vec3 opposeVelocityAlongNormal = -1 * amt * Normals[gid].xyz;
-    acc += 0.4 * opposeVelocityAlongNormal;
+//    float amt = dot(Normals[gid].xyz, Velocities[gid].xyz);
+//    vec3 opposeVelocityAlongNormal = -1 * amt * Normals[gid].xyz;
+//    acc += 0.4 * opposeVelocityAlongNormal;
 
     // Extra damping
     acc -= 0.1 * Velocities[gid].xyz;
 
     Accelerations[gid].xyz = acc;
-    //NewVelocities[gid].xyz += acc * dt;
 }
 
 void IntegrateForces() {
-    //Velocities[gid].xyz = Positions[gid].xyz - LastPositions[gid].xyz;
-
     if (!MassParameters[gid].isFixed) {
-        /*vec3 newPos = 2 * Positions[gid].xyz - LastPositions[gid].xyz + Accelerations[gid].xyz * dt * dt;
-        LastPositions[gid].xyz = Positions[gid].xyz;
-        Positions[gid].xyz = newPos;*/
         Velocities[gid].xyz += Accelerations[gid].xyz * dt;
-        //Positions[gid].xyz += Velocities[gid].xyz * dt + Accelerations[gid].xyz * dt * dt;
         Positions[gid].xyz += Velocities[gid].xyz * dt;
     } else {
         Velocities[gid].xyz = vec3(0, 0, 0);
     }
 }
 
-void ExecuteCollisions() {
-    float extraRadiusFactor = 1.01;
-    if (distance(Positions[gid].xyz, obstacleCenter) < obstacleRadius * extraRadiusFactor) {
-        vec3 normal = normalize(Positions[gid].xyz - obstacleCenter);
-        Positions[gid].xyz = obstacleCenter + normal * obstacleRadius * extraRadiusFactor;
-
-        vec3 velTowardCenter = dot(-1 * normal, Velocities[gid].xyz) * (-1 * normal);
-        Velocities[gid].xyz -= velTowardCenter;
-        Velocities[gid].xyz *= 0.9999;
-        //Velocities[gid].xyz = normal * (dot(Velocities[gid].xyz * -0.9, normal));
-        //Velocities[gid].xyz = vec3(0, 0, 0);
-    }
-}
-
-void ComputeNormals() {
-    Connections connections = MassParameters[gid].connections;
-    uint leftIndex = BAD_INDEX, upIndex = BAD_INDEX;
-
-    // This makes me sad
-    if (connections.left != BAD_INDEX && connections.up != BAD_INDEX) {
-        leftIndex = connections.left;
-        upIndex = connections.up;
-    } else if (connections.up != BAD_INDEX && connections.right != BAD_INDEX) {
-        leftIndex = connections.up;
-        upIndex = connections.right;
-    } else if (connections.right != BAD_INDEX && connections.down != BAD_INDEX) {
-        leftIndex = connections.right;
-        upIndex = connections.down;
-    } else if (connections.down != BAD_INDEX && connections.left != BAD_INDEX) {
-        leftIndex = connections.down;
-        upIndex = connections.left;
-    }
-
-    if (leftIndex == BAD_INDEX || upIndex == BAD_INDEX) {
-        Normals[gid].xyz = vec3(0, 0, 0);
-        return;
-    }
-
-    vec3 toLeft = normalize(Positions[leftIndex].xyz - Positions[gid].xyz);
-    vec3 toUp = normalize(Positions[upIndex].xyz - Positions[gid].xyz);
-
-    vec3 normal = normalize(cross(toLeft, toUp));
-    Normals[gid].xyz = normal;
-}
-
 void main() {
     gid = gl_GlobalInvocationID.x;
 
-    if (computationStage == 0) {
-        CalculateForces();
-    } else if (computationStage == 1) {
-        IntegrateForces();
-        ExecuteCollisions();
-        ComputeNormals();
-    }
+	for (int i = 0; i < numSamplesToGenerate; i++) {
+		for (int j = 0; j < 10; j++) {
+			CalculateForces();
+			barrier();
+			IntegrateForces();
+		}
+
+		barrier();
+
+		if (gl_LocalInvocationIndex == 0) { // Only want one guy to do this
+			// Calculate the output sample
+			//SamplesBuffer[i] = 10;
+			// SomeBuffer[SomeCounter++] = sampleResult;
+			SamplesBuffer[i] = .5 * Velocities[micPosition].z + .25 * Velocities[micPosition - micSpread].z + .25 * Velocities[micPosition + micSpread].z;
+		}
+	}
 }
