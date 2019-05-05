@@ -24,7 +24,6 @@ CMakeCache.txt
 *.so
 *.dylib
 *.dll
-!**/extern/SDL2/lib/**
 
 # Fortran module files
 *.mod
@@ -35,6 +34,7 @@ CMakeCache.txt
 *.la
 *.a
 *.lib
+!**/extern/SDL2/lib/**
 
 # Executables
 *.exe
