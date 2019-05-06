@@ -5,6 +5,7 @@ class SoundManager {
     explicit SoundManager(int samplesPerSecond);
 
     void InitSound(int samplesPerSecond);
+    static double GetAmplitude(float sample);
 
     static const int soundBuffSize = 104 * 1024;
     static float soundBuff[soundBuffSize];

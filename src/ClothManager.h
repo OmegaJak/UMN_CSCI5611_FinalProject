@@ -41,7 +41,7 @@ class ClothManager {
     void UpdateComputeParameters() const;
     void ExecuteComputeShader();
     void Pluck(float strength = 0.1, int location = -1);
-    static void CopySamplesToAudioBuffer();
+    void CopySamplesToAudioBuffer();
 
     static const int WORK_GROUP_SIZE = 32;
     static const int NUM_MASSES = 32;

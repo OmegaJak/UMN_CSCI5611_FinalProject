@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <fstream>
 
 #include "ClothManager.h"
@@ -54,26 +55,29 @@ void SoundManager::InitSound(int samplesPerSecond) {
     }
 }
 
+double SoundManager::GetAmplitude(float sample) {
+    static double tripToneVol = 3 * ToneVolume;
+    double amp = ToneVolume * 2 * sample;                                               // amplitude
+    amp = amp > tripToneVol ? tripToneVol : (amp < -tripToneVol ? -tripToneVol : amp);  // clamp
+    return amp;
+}
+
 void audio_callback(void* beeper_, Uint8* stream_, int len_) {
     short* stream = (short*)stream_;
     int len = len_ / 2;
-
-    if (ClothManager::ready) {
-        ClothManager::CopySamplesToAudioBuffer();
-    }
 
     // TODO: Write what comes from string sim to wav file
     for (int i = 0; i < len; i++) {
         if (SoundManager::lastSampleIndex < SoundManager::lastSimulationSampleIndex) {
             if (SoundManager::lastSimulationSampleIndex > SoundManager::soundBuffSize) exit(0);
+            stream[i] = SoundManager::GetAmplitude(SoundManager::soundBuff[SoundManager::lastSampleIndex]);
             SoundManager::lastSampleIndex++;
-            double amp = SoundManager::ToneVolume * 2 * SoundManager::soundBuff[SoundManager::lastSampleIndex];  // amplitude
-            amp = amp > 3 * SoundManager::ToneVolume ? 3 * SoundManager::ToneVolume
-                                                     : amp < -3 * SoundManager::ToneVolume ? -3 * SoundManager::ToneVolume : amp;  // clamp
-            stream[i] = amp;
-        } else {                        // Our simulation has fallen behind the audio rate
-            stream[i] = stream[i - 1];  //... repeat last tone (I'm not sure why this works so well, but it does)
+        } else {  // Our simulation has fallen behind the audio rate
+            int ind = SoundManager::lastSimulationSampleIndex - 1 < 0 ? 0 : SoundManager::lastSimulationSampleIndex - 1;
+            stream[i] = SoundManager::GetAmplitude(SoundManager::soundBuff[ind]);  //... repeat last tone (I'm not sure why this
+                                                                                   // works so well, but it does)
         }
+        // printf("stream[%i]: %i\n", i, stream[i]);
     }
 
     if (SoundManager::lastSimulationSampleIndex + len > SoundManager::soundBuffSize) {

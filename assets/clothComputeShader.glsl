@@ -121,15 +121,14 @@ vec3 getAccelerationFromSpringConnection(uint massOne, uint massTwo) {
     if (massOne == BAD_INDEX || massTwo == BAD_INDEX) return vec3(0, 0, 0);
     vec3 originalPosition = Positions[massOne].xyz;
     vec3 originalVelocity = Velocities[massOne].xyz;
-    float mass = 10;
     vec3 p2 = Positions[massTwo].xyz;
     vec3 v2 = Velocities[massTwo].xyz;
 
-    vec3 a = getSpringAcceleration(originalPosition, originalVelocity, mass, p2, v2);
+    vec3 a = getSpringAcceleration(originalPosition, originalVelocity, MassParameters[gid].mass, p2, v2);
     vec3 v_half = originalVelocity + a * 0.5 * dt;
     vec3 p_half = originalPosition + v_half * 0.5 * dt;
 
-    vec3 a_half = getSpringAcceleration(p_half, v_half, mass, p2, v2);
+    vec3 a_half = getSpringAcceleration(p_half, v_half, MassParameters[gid].mass, p2, v2);
     return a_half;
 }
 
@@ -138,14 +137,6 @@ void CalculateForces() {
     vec3 rightAcc = getAccelerationFromSpringConnection(gid, MassParameters[gid].connections.right);
 
     vec3 acc = gravity + leftAcc + rightAcc;
-
-    // 'Drag'
-//    float amt = dot(Normals[gid].xyz, Velocities[gid].xyz);
-//    vec3 opposeVelocityAlongNormal = -1 * amt * Normals[gid].xyz;
-//    acc += 0.4 * opposeVelocityAlongNormal;
-
-    // Extra damping
-    acc -= 0.1 * Velocities[gid].xyz;
 
     Accelerations[gid].xyz = acc;
 }
@@ -163,18 +154,12 @@ void main() {
     gid = gl_GlobalInvocationID.x;
 
 	for (int i = 0; i < numSamplesToGenerate; i++) {
-		for (int j = 0; j < 10; j++) {
-			CalculateForces();
-			barrier();
-			IntegrateForces();
-		}
-
+		CalculateForces();
+		barrier();
+		IntegrateForces();
 		barrier();
 
 		if (gl_LocalInvocationIndex == 0) { // Only want one guy to do this
-			// Calculate the output sample
-			//SamplesBuffer[i] = 10;
-			// SomeBuffer[SomeCounter++] = sampleResult;
 			SamplesBuffer[i] = .5 * Velocities[micPosition].z + .25 * Velocities[micPosition - micSpread].z + .25 * Velocities[micPosition + micSpread].z;
 		}
 	}

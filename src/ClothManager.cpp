@@ -2,6 +2,7 @@
 
 #include <SDL_stdinc.h>
 
+#include <algorithm>
 #include <ctime>
 #include <glm/gtc/type_ptr.hpp>
 
@@ -26,7 +27,13 @@ bool ClothManager::ready = false;
 
 ClothManager::ClothManager() {
     srand(time(NULL));
-    simParameters = simParams{0.0005, 50000, 0.3, 0.7, 2000, NUM_MASSES / 2, NUM_MASSES / 3};
+    simParameters = simParams{0.008,  // dt
+                              50000,  // ks
+                              0.0,    // kd
+                              0.99,   // restLength
+                              600,    // updates
+                              NUM_MASSES / 2,
+                              NUM_MASSES / 3};
     InitGL();
 }
 
@@ -39,7 +46,7 @@ void ClothManager::InitGL() {
     printf("Initializing mass positions...\n");
     position *positions = (position *)glMapBufferRange(GL_SHADER_STORAGE_BUFFER, 0, NUM_MASSES * sizeof(position), bufMask);
     for (int i = 0; i < NUM_MASSES; i++) {
-        positions[i] = {0.0f, float(i), BASE_HEIGHT, 1.0f};
+        positions[i] = {0.0f, float(i), 1.0f, BASE_HEIGHT};
     }
     glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
     ////
@@ -54,7 +61,7 @@ void ClothManager::InitGL() {
     for (int i = 0; i < NUM_MASSES; i++) {
         massParameters[i].isFixed = (i == 0 || i == NUM_MASSES - 1);
         // massParameters[i].isFixed = false;
-        massParameters[i].mass = 0.1;
+        massParameters[i].mass = 20;
 
         // Initialize connections
         unsigned int left = BAD_INDEX, right = BAD_INDEX;
@@ -75,7 +82,7 @@ void ClothManager::InitGL() {
     // Prepare the samples buffer (just zero it out) //
     glGenBuffers(1, &samplesSSbo);
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, samplesSSbo);
-    glBufferData(GL_SHADER_STORAGE_BUFFER, SAMPLES_BUFFER_SIZE * sizeof(GLfloat), nullptr, GL_DYNAMIC_DRAW);
+    glBufferData(GL_SHADER_STORAGE_BUFFER, SAMPLES_BUFFER_SIZE * sizeof(GLfloat), nullptr, GL_DYNAMIC_READ);
 
     GLfloat *samples = (GLfloat *)glMapBufferRange(GL_SHADER_STORAGE_BUFFER, 0, SAMPLES_BUFFER_SIZE * sizeof(GLfloat), bufMask);
     memset(samples, 0, SAMPLES_BUFFER_SIZE * sizeof(GLfloat));
@@ -125,6 +132,7 @@ void ClothManager::UpdateComputeParameters() const {
 }
 
 void ClothManager::ExecuteComputeShader() {
+    if (ready) CopySamplesToAudioBuffer();
     UpdateComputeParameters();
 
     glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, posSSbo);
@@ -150,8 +158,7 @@ void ClothManager::ExecuteComputeShader() {
         printf("SamplesVal %i: %f\n", i, samples[i]);
     }
     glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);*/
-    CopySamplesToAudioBuffer();
-    // ready = true;
+    ready = true;
 }
 
 void ClothManager::Pluck(float strength, int location) {
@@ -177,9 +184,9 @@ void ClothManager::CopySamplesToAudioBuffer() {
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, samplesSSbo);
     GLfloat *samples = (GLfloat *)glMapBufferRange(GL_SHADER_STORAGE_BUFFER, 0, SAMPLES_BUFFER_SIZE * sizeof(GLfloat), GL_MAP_READ_BIT);
     if (samples != nullptr) {
-        for (int i = 0; i < 800 && SoundManager::lastSimulationSampleIndex < SoundManager::soundBuffSize; i++) {
-            SoundManager::soundBuff[SoundManager::lastSimulationSampleIndex++] = samples[i];
-        }
+        int numToCopy = std::min(simParameters.numSamplesToGenerate, SoundManager::soundBuffSize - SoundManager::lastSimulationSampleIndex);
+        memcpy(&SoundManager::soundBuff[SoundManager::lastSimulationSampleIndex], samples, numToCopy * sizeof(float));
+        SoundManager::lastSimulationSampleIndex += numToCopy;
     }
     glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
 }
