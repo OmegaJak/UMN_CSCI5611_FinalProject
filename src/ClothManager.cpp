@@ -183,11 +183,7 @@ void ClothManager::Pluck(float strength, int location) {
 void ClothManager::CopySamplesToAudioBuffer() {
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, samplesSSbo);
     GLfloat *samples = (GLfloat *)glMapBufferRange(GL_SHADER_STORAGE_BUFFER, 0, SAMPLES_BUFFER_SIZE * sizeof(GLfloat), GL_MAP_READ_BIT);
-    if (samples != nullptr) {
-        int numToCopy = std::min(simParameters.numSamplesToGenerate, SoundManager::soundBuffSize - SoundManager::lastSimulationSampleIndex);
-        memcpy(&SoundManager::soundBuff[SoundManager::lastSimulationSampleIndex], samples, numToCopy * sizeof(float));
-        SoundManager::lastSimulationSampleIndex += numToCopy;
-    }
+    SoundManager::copyToSoundBuffer(samples, simParameters.numSamplesToGenerate);
     glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
 }
 
