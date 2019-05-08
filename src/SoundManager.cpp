@@ -6,8 +6,10 @@
 
 int SoundManager::lastSampleIndex = 0;
 int SoundManager::lastSimulationSampleIndex = 0;
-float SoundManager::soundBuff[SoundManager::soundBuffSize];
+float SoundManager::soundBuffs[SoundManager::BUfferNumber][SoundManager::soundBuffSize];
+int SoundManager::_SmartBuff[SoundManager::BUfferNumber];
 int SoundManager::_bufferCount = 0;
+std::priority_queue<std::pair<float, unsigned int>> SoundManager::_q;
 
 SoundManager::SoundManager(int samplesPerSecond) {
     InitSound(samplesPerSecond);
@@ -49,9 +51,9 @@ void SoundManager::InitSound(int samplesPerSecond) {
 
     // Zero things
     lastSimulationSampleIndex = 0;
-    for (int i = 0; i < soundBuffSize; i++) {
-        soundBuff[i] = 0;
-    }
+    std::memset(_SmartBuff, 0, sizeof _SmartBuff);
+    std::memset(soundBuffs, 0, sizeof(float) * BUfferNumber * soundBuffSize);
+
 }
 
 double SoundManager::GetAmplitude(float sample) {
@@ -61,29 +63,34 @@ double SoundManager::GetAmplitude(float sample) {
     return amp;
 }
 
-void SoundManager::copyToSoundBuffer(float* samples, int numSamplesToGenerate) {
+unsigned int SoundManager::copyToSoundBuffer(float* samples, int numSamplesToGenerate) {
+    unsigned int index = findNextFreeBuff();
     if (samples != nullptr) {
         int numToCopy = std::min(numSamplesToGenerate, SoundManager::soundBuffSize - SoundManager::lastSimulationSampleIndex);
-        memcpy(&SoundManager::soundBuff[SoundManager::lastSimulationSampleIndex], samples, numToCopy * sizeof(float));
+        memcpy(&SoundManager::soundBuffs[index][SoundManager::lastSimulationSampleIndex], samples, numToCopy * sizeof(float));
         SoundManager::lastSimulationSampleIndex += numToCopy;
     }
+    return index;
 }
 
 void SoundManager::audio_callback(void* beeper_, Uint8* stream_, int len_) {
     short* stream = (short*)stream_;
     int len = len_ / 2;
-    printf("_count = %d\n", _bufferCount);
+    //printf("_count = %d\n", _bufferCount);
+    static float playBuff[SoundManager::soundBuffSize];
+    
     for (int i = 0; i < soundBuffSize; ++i) {
-        soundBuff[i] *= _bufferCount * 0.01;//TODO: try to deal with distortion
-    }
+        soundBuffs[0][i] *= _bufferCount * 0.01;//TODO: try to deal with distortion
+    
+
     for (int i = 0; i < len; i++) {
         if (lastSampleIndex < lastSimulationSampleIndex) {
             if (lastSimulationSampleIndex > soundBuffSize) exit(0);
-            stream[i] = GetAmplitude(soundBuff[lastSampleIndex]);
+            stream[i] = GetAmplitude(soundBuffs[0][lastSampleIndex]);
             lastSampleIndex++;
         } else {  // Our simulation has fallen behind the audio rate
             int ind = lastSimulationSampleIndex - 1 < 0 ? 0 : lastSimulationSampleIndex - 1;
-            stream[i] = GetAmplitude(soundBuff[ind]);  //... repeat last tone (I'm not sure why this
+            stream[i] = GetAmplitude(soundBuffs[0][ind]);  //... repeat last tone (I'm not sure why this
                                                        // works so well, but it does)
         }
         // printf("stream[%i]: %i\n", i, stream[i]);
@@ -92,12 +99,12 @@ void SoundManager::audio_callback(void* beeper_, Uint8* stream_, int len_) {
     if (lastSimulationSampleIndex + len > soundBuffSize) {
         printf("Looping Buffer %d %d %d!\n", lastSimulationSampleIndex - lastSampleIndex, lastSimulationSampleIndex, lastSampleIndex);
         if (lastSimulationSampleIndex > lastSampleIndex) {
-            memcpy(&soundBuff[0], &soundBuff[lastSampleIndex], sizeof(float) * (lastSimulationSampleIndex - lastSampleIndex));
+            memcpy(&soundBuffs[0][0], &soundBuffs[0][lastSampleIndex], sizeof(float) * (lastSimulationSampleIndex - lastSampleIndex));
             lastSimulationSampleIndex = lastSimulationSampleIndex - lastSampleIndex;
         } else {
             lastSimulationSampleIndex = 0;
         }
         lastSampleIndex = 0;
-        memset(&soundBuff[lastSimulationSampleIndex], 0, sizeof(float) * (soundBuffSize - lastSimulationSampleIndex));
+        memset(&playBuff[lastSimulationSampleIndex], 0, sizeof(float) * (soundBuffSize - lastSimulationSampleIndex));
     }
 }

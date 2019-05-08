@@ -6,7 +6,7 @@
 #include <iostream>
 
 glm::vec3 RayTracer::listenerPoint;
-void RayTracer::shootThemAll() {
+void RayTracer::shootThemAll(int index) {
     // TODO: get current source positon from cloth manager
     const glm::vec3 sourcPoint = glm::vec3(0, 0, 0);
 
@@ -17,7 +17,7 @@ void RayTracer::shootThemAll() {
     float angle = 0;
     for (int i = 0; i < RayNumber; ++i) {
         Ray ray(glm::vec3(sourcPoint.x, sourcPoint.y, 0), glm::vec3(cos(angle), sin(angle), 0));
-        ray.trace();
+        ray.trace(index);
         angle += AngleStep;
     }
 }
@@ -37,12 +37,12 @@ float RayTracer::Ray::hitWal(float listenerDis, int step) {
 	// if Hit wall recursive raytrace here
 }
 
-void RayTracer::Ray::trace(int step) {
+void RayTracer::Ray::trace(int index, int step) {
     float lDis = hitListenr();
     float wDis = hitWal(lDis,step);
     
     if (lDis < wDis) {
         // add current to buffer
-        SoundManager::addBuffer();
+        SoundManager::addBuffer(0.0, index);
     }
 }

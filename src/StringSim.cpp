@@ -55,7 +55,7 @@ void StringSim::Update(double dt, int numTimesToUpdate, bool audio) {
             int micPos = _numVertices / 2;
             int sideDist = _numVertices / 3;
             SDL_LockAudio();
-            _soundManager->soundBuff[_soundManager->lastSimulationSampleIndex++] =
+            _soundManager->soundBuffs[0][_soundManager->lastSimulationSampleIndex++] =
                 .5 * velY[micPos] + .25 * velY[micPos - sideDist] + .25 * velY[micPos + sideDist];
             SDL_UnlockAudio();
         }

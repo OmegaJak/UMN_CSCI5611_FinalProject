@@ -15,14 +15,14 @@ class RayTracer {
 
        public:
         Ray(glm::vec3 start, glm::vec3 dir) : _start(start), _dir(dir){}
-        void trace(int step = MaxReflection);
+        void trace(int index, int step = MaxReflection);
         float hitListenr();
 		float hitWal(float listenerDis, int step);
 	};
     static glm::vec3 listenerPoint;
 
    public:
-    void shootThemAll();
+    void shootThemAll(int index);
     static RayTracer& getInstance() {
         static RayTracer instance;
         return instance;

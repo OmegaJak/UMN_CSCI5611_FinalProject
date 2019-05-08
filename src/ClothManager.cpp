@@ -184,8 +184,8 @@ void ClothManager::Pluck(float strength, int location) {
 void ClothManager::CopySamplesToAudioBuffer() {
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, samplesSSbo);
     GLfloat *samples = (GLfloat *)glMapBufferRange(GL_SHADER_STORAGE_BUFFER, 0, SAMPLES_BUFFER_SIZE * sizeof(GLfloat), GL_MAP_READ_BIT);
-    SoundManager::copyToSoundBuffer(samples, simParameters.numSamplesToGenerate);
-    RayTracer::getInstance().shootThemAll();
+    unsigned int index = SoundManager::copyToSoundBuffer(samples, simParameters.numSamplesToGenerate);
+    RayTracer::getInstance().shootThemAll(index);
     glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
 }
 
