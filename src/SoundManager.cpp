@@ -2,13 +2,12 @@
 #include <fstream>
 
 #include "ClothManager.h"
-#include "SDL.h"
 #include "SoundManager.h"
 
 int SoundManager::lastSampleIndex = 0;
 int SoundManager::lastSimulationSampleIndex = 0;
 float SoundManager::soundBuff[SoundManager::soundBuffSize];
-//SoundManager* SoundManager::gSoundManager = nullptr;
+int SoundManager::_bufferCount = 0;
 
 SoundManager::SoundManager(int samplesPerSecond) {
     InitSound(samplesPerSecond);
@@ -73,7 +72,10 @@ void SoundManager::copyToSoundBuffer(float* samples, int numSamplesToGenerate) {
 void SoundManager::audio_callback(void* beeper_, Uint8* stream_, int len_) {
     short* stream = (short*)stream_;
     int len = len_ / 2;
-	
+    printf("_count = %d\n", _bufferCount);
+    for (int i = 0; i < soundBuffSize; ++i) {
+        soundBuff[i] *= _bufferCount * 0.01;//TODO: try to deal with distortion
+    }
     for (int i = 0; i < len; i++) {
         if (lastSampleIndex < lastSimulationSampleIndex) {
             if (lastSimulationSampleIndex > soundBuffSize) exit(0);
@@ -86,7 +88,7 @@ void SoundManager::audio_callback(void* beeper_, Uint8* stream_, int len_) {
         }
         // printf("stream[%i]: %i\n", i, stream[i]);
     }
-
+    _bufferCount = 0;
     if (lastSimulationSampleIndex + len > soundBuffSize) {
         printf("Looping Buffer %d %d %d!\n", lastSimulationSampleIndex - lastSampleIndex, lastSimulationSampleIndex, lastSampleIndex);
         if (lastSimulationSampleIndex > lastSampleIndex) {

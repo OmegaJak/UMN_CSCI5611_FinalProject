@@ -197,13 +197,13 @@ int main(int argc, char* argv[]) {
 
     SDL_GL_SetSwapInterval(1);
 
-    Camera camera = Camera();
+    Camera::getInstance();
 
     Environment environment = Environment();
 
     ClothManager clothManager = ClothManager();
 
-    SoundManager soundManager = SoundManager(48000);
+    SoundManager soundManager = SoundManager::getInstance();
     auto stringParams = StringParameters{50000, 0.3, 0.848, 0.755};
     StringSim stringSim = StringSim(stringParams, 30, &soundManager);
 
@@ -270,7 +270,7 @@ int main(int argc, char* argv[]) {
 
             if (windowEvent.type == SDL_MOUSEMOTION && SDL_GetRelativeMouseMode() == SDL_TRUE) {
                 // printf("Mouse movement (xrel, yrel): (%i, %i)\n", windowEvent.motion.xrel, windowEvent.motion.yrel);
-                camera.ProcessMouseInput(windowEvent.motion.xrel, windowEvent.motion.yrel);
+                Camera::getInstance().ProcessMouseInput(windowEvent.motion.xrel, windowEvent.motion.yrel);
             } else if (SDL_GetRelativeMouseMode() == SDL_FALSE) {
                 SDL_GetMouseState(&mouseX, &mouseY);
                 normalizedMouseX = (2 * (mouseX / (double)screenWidth)) - 1;
@@ -309,21 +309,21 @@ int main(int argc, char* argv[]) {
         glClearColor(gray, gray, gray, 1.0f);  // Clear the screen to default color
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        camera.Update();
+        Camera::getInstance().Update();
         glm::mat4 proj = glm::perspective(3.14f / 2, screenWidth / (float)screenHeight, 0.4f, 10000.0f);  // FOV, aspect, near, far
         ShaderManager::ApplyToEachRenderShader(
             [proj](ShaderAttributes attributes) -> void { glUniformMatrix4fv(attributes.projection, 1, GL_FALSE, glm::value_ptr(proj)); },
             PROJ_SHADER_FUNCTION_ID);
 
         if (SDL_GetMouseState(NULL, NULL) & SDL_BUTTON(SDL_BUTTON_LEFT) & ~SDL_BUTTON(SDL_BUTTON_RIGHT)) {
-            lastMouseWorldCoord = camera.GetMousePosition(normalizedMouseX, normalizedMouseY, proj, gravityCenterDistance);
+            lastMouseWorldCoord = Camera::getInstance().GetMousePosition(normalizedMouseX, normalizedMouseY, proj, gravityCenterDistance);
             environment.SetGravityCenterPosition(lastMouseWorldCoord);
         }
 
         stringstream debugText;
         debugText << fixed << setprecision(3) << " | " << lastAverageFrameTime << " per frame (" << lastFramerate << "FPS) average over "
                   << framesPerSample << " frames "
-                  << " | cameraPosition: " << camera.GetPosition() << " | CoG position: " << lastMouseWorldCoord
+                  << " | cameraPosition: " << Camera::getInstance().GetPosition() << " | CoG position: " << lastMouseWorldCoord
                   << " | Sim running: " << (clothManager.simParameters.dt > 0);
         SDL_SetWindowTitle(window, debugText.str().c_str());
 

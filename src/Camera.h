@@ -3,8 +3,10 @@
 
 class Camera {
    public:
-    Camera();
-
+    static Camera& getInstance() {
+        static Camera instance;
+        return instance;
+    }
     void ProcessMouseInput(float deltaX, float deltaY, bool constrainPitch = true);
     void ProcessKeyboardInput();
 
@@ -15,7 +17,7 @@ class Camera {
 
    private:
     void UpdateCameraVectors();
-
+    Camera();
     glm::vec3 _position, _forward, _up, _right, _worldUp;
     float _yaw, _pitch;
     glm::mat4 _view;

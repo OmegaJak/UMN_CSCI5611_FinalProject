@@ -105,6 +105,7 @@ glm::vec3 Camera::GetForward() {
 void Camera::Update() {
     ProcessKeyboardInput();
     auto view = glm::lookAt(_position, _position + _forward, _up);
+
     _view = view;
 
     ShaderManager::ApplyToEachRenderShader(

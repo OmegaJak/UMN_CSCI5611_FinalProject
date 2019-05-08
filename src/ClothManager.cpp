@@ -14,6 +14,7 @@
 #include "Timer.h"
 #include "Utils.h"
 #include "glad.h"
+#include "RayTracer.h"
 
 const GLint bufMask = GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT;
 
@@ -184,6 +185,7 @@ void ClothManager::CopySamplesToAudioBuffer() {
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, samplesSSbo);
     GLfloat *samples = (GLfloat *)glMapBufferRange(GL_SHADER_STORAGE_BUFFER, 0, SAMPLES_BUFFER_SIZE * sizeof(GLfloat), GL_MAP_READ_BIT);
     SoundManager::copyToSoundBuffer(samples, simParameters.numSamplesToGenerate);
+    RayTracer::getInstance().shootThemAll();
     glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
 }
 
