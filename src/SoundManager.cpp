@@ -81,7 +81,7 @@ void SoundManager::audio_callback(void* beeper_, Uint8* stream_, int len_) {
     
     for (int i = 0; i < soundBuffSize; ++i) {
         soundBuffs[0][i] *= _bufferCount * 0.01;//TODO: try to deal with distortion
-    
+    }
 
     for (int i = 0; i < len; i++) {
         if (lastSampleIndex < lastSimulationSampleIndex) {
