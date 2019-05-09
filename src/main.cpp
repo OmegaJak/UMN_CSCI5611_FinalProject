@@ -249,17 +249,18 @@ int main(int argc, char* argv[]) {
                     if (windowEvent.key.keysym.sym == SDLK_MINUS) modAmount *= -1;
 
                     gravityCenterDistance += modAmount;
-                } else if (windowEvent.key.keysym.sym == SDLK_t) {
-                    clothManager.Pluck(1.0);
+                } else if (windowEvent.key.keysym.sym >= SDLK_1 && windowEvent.key.keysym.sym <= SDLK_8) {
+                    int index = windowEvent.key.keysym.sym - SDLK_1;  // Character math... I'm sorry
+                    clothManager.Pluck(index, 1.0);
                 }
             } else if (windowEvent.type == SDL_KEYDOWN) {
-                if (windowEvent.key.keysym.sym == SDLK_SPACE) {
+                /*if (windowEvent.key.keysym.sym == SDLK_SPACE) {
                     if (clothManager.simParameters.dt > 0) {
                         clothManager.simParameters.dt = 0;
                     } else {
                         clothManager.simParameters.dt = COMPUTE_SHADER_TIMESTEP;
                     }
-                }
+                }*/
             }
 
             if (SDL_GetMouseState(NULL, NULL) & SDL_BUTTON(SDL_BUTTON_RIGHT)) {  // Right click is down
@@ -289,7 +290,7 @@ int main(int argc, char* argv[]) {
         }
 
         auto time = SDL_GetTicks() / 1000.0f;
-		timePassed = time;
+        timePassed = time;
         float deltaTime = time - lastTickTime;
         lastTickTime = time;
 
@@ -324,8 +325,8 @@ int main(int argc, char* argv[]) {
         stringstream debugText;
         debugText << fixed << setprecision(3) << " | " << lastAverageFrameTime << " per frame (" << lastFramerate << "FPS) average over "
                   << framesPerSample << " frames "
-                  << " | cameraPosition: " << Camera::getInstance().GetPosition() << " | CoG position: " << lastMouseWorldCoord
-                  << " | Sim running: " << (clothManager.simParameters.dt > 0);
+                  << " | cameraPosition: " << Camera::getInstance().GetPosition() << " | CoG position: " << lastMouseWorldCoord;
+        //<< " | Sim running: " << (clothManager.simParameters.dt > 0);
         SDL_SetWindowTitle(window, debugText.str().c_str());
 
         // Simulate using compute shader

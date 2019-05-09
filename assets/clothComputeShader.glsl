@@ -34,14 +34,21 @@ layout(std430, binding = 6) buffer MssPrps {
     MassParams MassParameters[];
 };
 
-layout(std430, binding = 4) buffer Parameters {
-    float dt;
+struct StringParams {
+	float dt;
     float ks;
     float kd;
     float restLength;
-	int numSamplesToGenerate;
 	uint micPosition;
 	uint micSpread;
+};
+
+layout(std430, binding = 4) buffer StrParams {
+    StringParams StringParameters[];
+};
+
+layout(std430, binding = 7) buffer GlobalSimParameters {
+	int numSamplesToGenerate;
 };
 
 layout(local_size_x = 32, local_size_y = 1, local_size_z = 1) in;
@@ -78,8 +85,8 @@ vec3 getSpringAcceleration(vec3 p1, vec3 v1, float m1, vec3 p2, vec3 v2) {
     float dampV1 = dot(toMassOneFromTwo, v1);
     float dampV2 = dot(toMassOneFromTwo, v2);
 
-    float springForce = -ks * (length - restLength);
-    float dampForce = -kd * (dampV1 - dampV2);
+    float springForce = -StringParameters[gl_WorkGroupID.x].ks * (length - StringParameters[gl_WorkGroupID.x].restLength);
+    float dampForce = -StringParameters[gl_WorkGroupID.x].kd * (dampV1 - dampV2);
     float force = springForce + dampForce;
 
     vec3 massOneAcc = 0.5 * force * toMassOneFromTwo / m1;
@@ -125,8 +132,8 @@ vec3 getAccelerationFromSpringConnection(uint massOne, uint massTwo) {
     vec3 v2 = Velocities[massTwo].xyz;
 
     vec3 a = getSpringAcceleration(originalPosition, originalVelocity, MassParameters[gid].mass, p2, v2);
-    vec3 v_half = originalVelocity + a * 0.5 * dt;
-    vec3 p_half = originalPosition + v_half * 0.5 * dt;
+    vec3 v_half = originalVelocity + a * 0.5 * StringParameters[gl_WorkGroupID.x].dt;
+    vec3 p_half = originalPosition + v_half * 0.5 * StringParameters[gl_WorkGroupID.x].dt;
 
     vec3 a_half = getSpringAcceleration(p_half, v_half, MassParameters[gid].mass, p2, v2);
     return a_half;
@@ -143,8 +150,8 @@ void CalculateForces() {
 
 void IntegrateForces() {
     if (!MassParameters[gid].isFixed) {
-        Velocities[gid].xyz += Accelerations[gid].xyz * dt;
-        Positions[gid].xyz += Velocities[gid].xyz * dt;
+        Velocities[gid].xyz += Accelerations[gid].xyz * StringParameters[gl_WorkGroupID.x].dt;
+        Positions[gid].xyz += Velocities[gid].xyz * StringParameters[gl_WorkGroupID.x].dt;
     } else {
         Velocities[gid].xyz = vec3(0, 0, 0);
     }
@@ -153,14 +160,17 @@ void IntegrateForces() {
 void main() {
     gid = gl_GlobalInvocationID.x;
 
+	uint samplesOffset = gl_WorkGroupID.x * numSamplesToGenerate;
 	for (int i = 0; i < numSamplesToGenerate; i++) {
 		CalculateForces();
 		barrier();
 		IntegrateForces();
 		barrier();
-
-		if (gl_LocalInvocationIndex == 0) { // Only want one guy to do this
-			SamplesBuffer[i] = .5 * Velocities[micPosition].z + .25 * Velocities[micPosition - micSpread].z + .25 * Velocities[micPosition + micSpread].z;
+		if (gl_LocalInvocationIndex == 0) { // Only want one guy to do this per workgroup
+			uint offset = gl_WorkGroupID.x * gl_WorkGroupSize.x;
+			SamplesBuffer[i + samplesOffset] = .5 * Velocities[offset + StringParameters[gl_WorkGroupID.x].micPosition].z 
+			+ .25 * Velocities[offset + StringParameters[gl_WorkGroupID.x].micPosition - StringParameters[gl_WorkGroupID.x].micSpread].z 
+			+ .25 * Velocities[offset + StringParameters[gl_WorkGroupID.x].micPosition + StringParameters[gl_WorkGroupID.x].micSpread].z;
 		}
 	}
 }

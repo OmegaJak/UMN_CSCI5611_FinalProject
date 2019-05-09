@@ -4,14 +4,17 @@
 
 class Environment;
 
-struct simParams {
+struct stringParams {
     GLfloat dt;
     GLfloat ks;
     GLfloat kd;
     GLfloat restLength;
-    GLint numSamplesToGenerate;
     GLuint micPosition;
     GLuint micSpread;
+};
+
+struct simParams {
+    GLint numSamplesToGenerate;
 };
 
 struct position {
@@ -40,12 +43,15 @@ class ClothManager {
     void InitGL();
     void UpdateComputeParameters() const;
     void ExecuteComputeShader();
-    void Pluck(float strength = 0.1, int location = -1);
+    void Pluck(int stringIndex, float strength = 0.1, int location = -1);
     void CopySamplesToAudioBuffer();
 
-    static const int WORK_GROUP_SIZE = 32;
-    static const int NUM_MASSES = 32;
-    static const int SAMPLES_BUFFER_SIZE = 4000;
+    static const unsigned int NUM_STRINGS = 8;
+    static const unsigned int WORK_GROUP_SIZE = 32;
+    static const unsigned int MASSES_PER_STRING = 32;
+    static const unsigned int TOTAL_NUM_MASSES = NUM_STRINGS * MASSES_PER_STRING;
+    static const unsigned int SAMPLES_PER_FRAME = 800;
+    static const unsigned int GPU_SAMPLES_BUFFER_SIZE = NUM_STRINGS * SAMPLES_PER_FRAME;
     constexpr static const float BASE_HEIGHT = 20.0f;
 
     static GLuint posSSbo;
@@ -53,8 +59,11 @@ class ClothManager {
     static GLuint accelSSbo;
     static GLuint samplesSSbo;
     static GLuint massSSbo;
-    static GLuint paramSSbo;
+    static GLuint stringParamSSbo;
+    static GLuint globalSimParamsSSbo;
 
-    simParams simParameters{};
+    stringParams stringParameters[NUM_STRINGS];
+    simParams globalSimParameters{};
+    float samplesBuffer[SAMPLES_PER_FRAME];
     static bool ready;
 };
