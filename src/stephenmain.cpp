@@ -35,7 +35,9 @@
 // const int numV = 30;
 //// double k = 50000, kV = 0.3, tension = .848, length = .755;  // Bell  - F4
 //// (348 Hz)
-// double k = 50000, kV = 0.3, tension = .848, length = .755;
+//// double k = 50000, kV = 0.3, tension = .848, length = .755;
+// double length = 0.755;
+// double k = 50000, kV = 0.3, tension = 0.85;
 //
 // double dt = 0.0001;  // Notice, this is really small =)
 //
