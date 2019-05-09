@@ -3,14 +3,17 @@
 
 #include "ClothManager.h"
 #include "SoundManager.h"
+#include "RayTracer.h"
 
 int SoundManager::lastSampleIndex = 0;
 int SoundManager::lastSimulationSampleIndex = 0;
-float SoundManager::soundBuffs[SoundManager::BUfferNumber][SoundManager::soundBuffSize];
+float SoundManager::soundBuffs[SoundManager::BUfferNumber][SoundManager::SampleNum];
 int SoundManager::_SmartBuff[SoundManager::BUfferNumber];
+float SoundManager::_playBuff[SoundManager::soundBuffSize];
 int SoundManager::_bufferCount = 0;
 std::priority_queue<std::pair<float, unsigned int>> SoundManager::_q;
 
+extern float timePassed;
 SoundManager::SoundManager(int samplesPerSecond) {
     InitSound(samplesPerSecond);
 }
@@ -53,7 +56,6 @@ void SoundManager::InitSound(int samplesPerSecond) {
     lastSimulationSampleIndex = 0;
     std::memset(_SmartBuff, 0, sizeof _SmartBuff);
     std::memset(soundBuffs, 0, sizeof(float) * BUfferNumber * soundBuffSize);
-
 }
 
 double SoundManager::GetAmplitude(float sample) {
@@ -63,48 +65,71 @@ double SoundManager::GetAmplitude(float sample) {
     return amp;
 }
 
-unsigned int SoundManager::copyToSoundBuffer(float* samples, int numSamplesToGenerate) {
-    unsigned int index = findNextFreeBuff();
+void SoundManager::copyToSoundBuffer(float* samples, int numSamplesToGenerate) {
     if (samples != nullptr) {
         int numToCopy = std::min(numSamplesToGenerate, SoundManager::soundBuffSize - SoundManager::lastSimulationSampleIndex);
-        memcpy(&SoundManager::soundBuffs[index][SoundManager::lastSimulationSampleIndex], samples, numToCopy * sizeof(float));
+        memcpy(&SoundManager::_playBuff[SoundManager::lastSimulationSampleIndex], samples, numToCopy * sizeof(float));
         SoundManager::lastSimulationSampleIndex += numToCopy;
     }
-    return index;
+	static float tmpBuff[SampleNum];
+	memset(tmpBuff, 0, sizeof(tmpBuff));
+		_q.pop();
+		for (int i = 0; i < SampleNum; ++i) tmpBuff[i] += soundBuffs[index][i];
+		--_SmartBuff[index];
+	}
+	//TODO: figure out a decent way for anti distortion
+	for (int i = 0; i < SampleNum; ++i) tmpBuff[i] *= 42.f/RayTracer::RayNumber;
+	copyToSoundBuffer(tmpBuff, SampleNum);
+}
+
+unsigned int SoundManager::storeSample(float* samples) {
+	unsigned int index = findNextFreeBuff();
+	memcpy(soundBuffs[index], samples, SampleNum*sizeof(float));
+	return index;
+}
+
+unsigned int SoundManager::findNextFreeBuff() {
+	static unsigned int lastFound = 0;
+	
+	for (int i = 0; i < BUfferNumber; ++i) {
+		if (lastFound == BUfferNumber) lastFound = 0;
+		if (_SmartBuff[lastFound] == 0) return lastFound;
+		lastFound++;
+	}
+
+	printf("WTF!!! need more buffer or shorter distinguish time!\n");
+	exit(42);
 }
 
 void SoundManager::audio_callback(void* beeper_, Uint8* stream_, int len_) {
     short* stream = (short*)stream_;
     int len = len_ / 2;
-    //printf("_count = %d\n", _bufferCount);
-    static float playBuff[SoundManager::soundBuffSize];
-    
-    for (int i = 0; i < soundBuffSize; ++i) {
-        soundBuffs[0][i] *= _bufferCount * 0.01;//TODO: try to deal with distortion
-    }
-
-    for (int i = 0; i < len; i++) {
-        if (lastSampleIndex < lastSimulationSampleIndex) {
+	 for (int i = 0; i < len; i++) {
+		if (lastSampleIndex < lastSimulationSampleIndex) {
             if (lastSimulationSampleIndex > soundBuffSize) exit(0);
-            stream[i] = GetAmplitude(soundBuffs[0][lastSampleIndex]);
+            stream[i] = GetAmplitude(_playBuff[lastSampleIndex]);
             lastSampleIndex++;
         } else {  // Our simulation has fallen behind the audio rate
-            int ind = lastSimulationSampleIndex - 1 < 0 ? 0 : lastSimulationSampleIndex - 1;
-            stream[i] = GetAmplitude(soundBuffs[0][ind]);  //... repeat last tone (I'm not sure why this
+			int ind = lastSimulationSampleIndex - 1 < 0 ? 0 : lastSimulationSampleIndex - 1;
+			stream[i] = GetAmplitude(_playBuff[ind]);  //... repeat last tone (I'm not sure why this
                                                        // works so well, but it does)
         }
         // printf("stream[%i]: %i\n", i, stream[i]);
-    }
-    _bufferCount = 0;
-    if (lastSimulationSampleIndex + len > soundBuffSize) {
+	 }
+	 if (lastSimulationSampleIndex + len > soundBuffSize) {
         printf("Looping Buffer %d %d %d!\n", lastSimulationSampleIndex - lastSampleIndex, lastSimulationSampleIndex, lastSampleIndex);
         if (lastSimulationSampleIndex > lastSampleIndex) {
-            memcpy(&soundBuffs[0][0], &soundBuffs[0][lastSampleIndex], sizeof(float) * (lastSimulationSampleIndex - lastSampleIndex));
+            memcpy(&_playBuff[0], &_playBuff[lastSampleIndex], sizeof(float) * (lastSimulationSampleIndex - lastSampleIndex));
             lastSimulationSampleIndex = lastSimulationSampleIndex - lastSampleIndex;
         } else {
-            lastSimulationSampleIndex = 0;
+			            lastSimulationSampleIndex = 0;
         }
-        lastSampleIndex = 0;
-        memset(&playBuff[lastSimulationSampleIndex], 0, sizeof(float) * (soundBuffSize - lastSimulationSampleIndex));
-    }
+		lastSampleIndex = 0;
+        memset(&_playBuff[lastSimulationSampleIndex], 0, sizeof(float) * (soundBuffSize - lastSimulationSampleIndex));
+	 }
+}
+
+void SoundManager::addBuffer(float time, unsigned int index) {
+	++_SmartBuff[index];
+	_q.push(std::make_pair(-time, index));
 }

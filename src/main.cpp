@@ -289,6 +289,7 @@ int main(int argc, char* argv[]) {
         }
 
         auto time = SDL_GetTicks() / 1000.0f;
+		timePassed = time;
         float deltaTime = time - lastTickTime;
         lastTickTime = time;
 

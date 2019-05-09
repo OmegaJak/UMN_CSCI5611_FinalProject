@@ -32,7 +32,7 @@ ClothManager::ClothManager() {
                               50000,  // ks
                               0.0,    // kd
                               0.99,   // restLength
-                              600,    // updates
+                              SoundManager::SampleNum,    // updates
                               NUM_MASSES / 2,
                               NUM_MASSES / 3};
     InitGL();
@@ -133,7 +133,10 @@ void ClothManager::UpdateComputeParameters() const {
 }
 
 void ClothManager::ExecuteComputeShader() {
-    if (ready) CopySamplesToAudioBuffer();
+	if (ready) {
+		SoundManager::sumSoundsOntime();
+		CopySamplesToAudioBuffer();
+	}
     UpdateComputeParameters();
 
     glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, posSSbo);
@@ -184,9 +187,9 @@ void ClothManager::Pluck(float strength, int location) {
 void ClothManager::CopySamplesToAudioBuffer() {
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, samplesSSbo);
     GLfloat *samples = (GLfloat *)glMapBufferRange(GL_SHADER_STORAGE_BUFFER, 0, SAMPLES_BUFFER_SIZE * sizeof(GLfloat), GL_MAP_READ_BIT);
-    unsigned int index = SoundManager::copyToSoundBuffer(samples, simParameters.numSamplesToGenerate);
-    RayTracer::getInstance().shootThemAll(index);
+    unsigned int index = SoundManager::storeSample(samples);
     glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
+	RayTracer::getInstance().shootThemAll(index);
 }
 
 void ClothManager::RenderParticles(float dt, Environment *environment) {

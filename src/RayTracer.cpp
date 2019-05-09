@@ -4,7 +4,7 @@
 #include "Camera.h"
 #include "minmax.h"
 #include <iostream>
-
+extern float timePassed;
 glm::vec3 RayTracer::listenerPoint;
 void RayTracer::shootThemAll(int index) {
     // TODO: get current source positon from cloth manager
@@ -42,7 +42,11 @@ void RayTracer::Ray::trace(int index, int step) {
     float wDis = hitWal(lDis,step);
     
     if (lDis < wDis) {
-        // add current to buffer
-        SoundManager::addBuffer(0.0, index);
+        //add current to buffer
+        SoundManager::addBuffer(timePassed, index);
+		SoundManager::addBuffer(timePassed+0.2, index);
+		//SoundManager::addBuffer(timePassed+0.8, index);
+		//SoundManager::addBuffer(timePassed+0.4, index);
+		//SoundManager::addBuffer(timePassed+0.6, index);
     }
 }

@@ -1,6 +1,7 @@
 #pragma once
 #include <glm/vec3.hpp>
 class RayTracer {
+public:
 	enum {
 		RayNumber = 1024,
 		ListenerRadius = 10,
@@ -8,6 +9,7 @@ class RayTracer {
 		MaxReflection = 5,
 		MaxListenDis = 420,
 	};
+private:
     RayTracer() {}
     class Ray {
         glm::vec3 _start;
