@@ -71,8 +71,13 @@ void SoundManager::copyToSoundBuffer(float* samples, int numSamplesToGenerate) {
         memcpy(&SoundManager::_playBuff[SoundManager::lastSimulationSampleIndex], samples, numToCopy * sizeof(float));
         SoundManager::lastSimulationSampleIndex += numToCopy;
     }
+}
+void SoundManager::sumSoundsOntime() {
 	static float tmpBuff[SampleNum];
 	memset(tmpBuff, 0, sizeof(tmpBuff));
+	while (!_q.empty() && -_q.top().first < timePassed) {
+		unsigned int index = _q.top().second;
+		//printf("Get buffer Index %u\n",  index);
 		_q.pop();
 		for (int i = 0; i < SampleNum; ++i) tmpBuff[i] += soundBuffs[index][i];
 		--_SmartBuff[index];
