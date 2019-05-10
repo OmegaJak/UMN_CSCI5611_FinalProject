@@ -11,6 +11,7 @@ float SoundManager::soundBuffs[SoundManager::BUfferNumber][SoundManager::SampleN
 int SoundManager::_SmartBuff[SoundManager::BUfferNumber];
 float SoundManager::_playBuff[SoundManager::soundBuffSize];
 int SoundManager::_bufferCount = 0;
+bool SoundManager::printSamples = false;
 std::priority_queue<std::pair<float, unsigned int>> SoundManager::_q;
 
 extern float timePassed;
@@ -61,7 +62,7 @@ void SoundManager::InitSound(int samplesPerSecond) {
 double SoundManager::GetAmplitude(float sample) {
     static double tripToneVol = 3 * ToneVolume;
     double amp = ToneVolume * 2 * sample;                                               // amplitude
-    amp = amp > tripToneVol ? tripToneVol : (amp < -tripToneVol ? -tripToneVol : amp);  // clamp
+    //amp = amp > tripToneVol ? tripToneVol : (amp < -tripToneVol ? -tripToneVol : amp);  // clamp
     return amp;
 }
 
@@ -109,18 +110,28 @@ unsigned int SoundManager::findNextFreeBuff() {
 void SoundManager::audio_callback(void* beeper_, Uint8* stream_, int len_) {
     short* stream = (short*)stream_;
     int len = len_ / 2;
+
     for (int i = 0; i < len; i++) {
+        int path = 0;
         if (lastSampleIndex < lastSimulationSampleIndex) {
             if (lastSimulationSampleIndex > soundBuffSize) exit(0);
             stream[i] = GetAmplitude(_playBuff[lastSampleIndex]);
             lastSampleIndex++;
+            path = 1;
         } else {  // Our simulation has fallen behind the audio rate
             int ind = lastSimulationSampleIndex - 1 < 0 ? 0 : lastSimulationSampleIndex - 1;
             stream[i] = GetAmplitude(_playBuff[ind]);  //... repeat last tone (I'm not sure why this
                                                        // works so well, but it does)
+            path = 2;
         }
-        // printf("stream[%i]: %i\n", i, stream[i]);
+
+        if (printSamples) {
+            if (i == 0) printf("--------------------\n");
+            printf("%i\n", stream[i]);
+            if (i == len - 1) printf("--------------------\n");
+        }
     }
+
     if (lastSimulationSampleIndex + len > soundBuffSize) {
         printf("Looping Buffer %d %d %d!\n", lastSimulationSampleIndex - lastSampleIndex, lastSimulationSampleIndex, lastSampleIndex);
         if (lastSimulationSampleIndex > lastSampleIndex) {

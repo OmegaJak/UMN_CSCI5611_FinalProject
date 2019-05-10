@@ -1,6 +1,7 @@
 #pragma once
 #include "Model.h"
 #include "glad.h"
+#include "Constants.h"
 
 class Environment;
 
@@ -50,7 +51,6 @@ class ClothManager {
     static const unsigned int WORK_GROUP_SIZE = 32;
     static const unsigned int MASSES_PER_STRING = 32;
     static const unsigned int TOTAL_NUM_MASSES = NUM_STRINGS * MASSES_PER_STRING;
-    static const unsigned int SAMPLES_PER_FRAME = 800;
     static const unsigned int GPU_SAMPLES_BUFFER_SIZE = NUM_STRINGS * SAMPLES_PER_FRAME;
     constexpr static const float BASE_HEIGHT = 20.0f;
 
