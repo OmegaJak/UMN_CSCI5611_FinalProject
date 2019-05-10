@@ -85,7 +85,7 @@ vec3 getSpringAcceleration(vec3 p1, vec3 v1, float m1, vec3 p2, vec3 v2) {
     float dampV1 = dot(toMassOneFromTwo, v1);
     float dampV2 = dot(toMassOneFromTwo, v2);
 
-    float springForce = -StringParameters[gl_WorkGroupID.x].ks * (length - StringParameters[gl_WorkGroupID.x].restLength);
+    float springForce = -(StringParameters[gl_WorkGroupID.x].ks / StringParameters[gl_WorkGroupID.x].restLength) * (length - StringParameters[gl_WorkGroupID.x].restLength);
     float dampForce = -StringParameters[gl_WorkGroupID.x].kd * (dampV1 - dampV2);
     float force = springForce + dampForce;
 

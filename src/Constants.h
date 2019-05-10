@@ -27,3 +27,5 @@ const int PROJ_SHADER_FUNCTION_ID = 2;
 const float COMPUTE_SHADER_TIMESTEP = 0.00002;
 const float IDEAL_FRAMERATE = 60;
 const unsigned int BAD_INDEX = 8000001;
+
+static const unsigned int SAMPLES_PER_FRAME = 800;
