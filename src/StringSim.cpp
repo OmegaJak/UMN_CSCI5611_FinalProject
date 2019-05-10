@@ -1,8 +1,10 @@
 #include "SDL.h"
 #include "StringSim.h"
 
-StringSim::StringSim(StringParameters stringParams, int numVertices, SoundManager* soundManager)
-    : _stringParameters(stringParams), _soundManager(soundManager), _numVertices(numVertices) {
+#include "SoundManager.h"
+
+StringSim::StringSim(StringParameters stringParams, int numVertices)
+    : _stringParameters(stringParams), _numVertices(numVertices) {
     posX = new double[numVertices];
     posY = new double[numVertices];
     velX = new double[numVertices];
@@ -13,8 +15,7 @@ StringSim::StringSim(StringParameters stringParams, int numVertices, SoundManage
 }
 
 void StringSim::Update(double dt, int numTimesToUpdate, bool audio) {
-    if (_soundManager->lastSimulationSampleIndex - _soundManager->lastSampleIndex > 2 * 2048 ||
-        _soundManager->lastSimulationSampleIndex + numTimesToUpdate >= SoundManager::soundBuffSize)
+    if (SoundManager::isSimulationAhead(numTimesToUpdate))
         return;  // Simulate ahead to keep a small buffer of sound
     for (int z = 0; z < numTimesToUpdate; z++) {
         for (int q = 0; q < 10; q++) {
@@ -55,8 +56,7 @@ void StringSim::Update(double dt, int numTimesToUpdate, bool audio) {
             int micPos = _numVertices / 2;
             int sideDist = _numVertices / 3;
             SDL_LockAudio();
-            _soundManager->soundBuffs[0][_soundManager->lastSimulationSampleIndex++] =
-                .5 * velY[micPos] + .25 * velY[micPos - sideDist] + .25 * velY[micPos + sideDist];
+			SoundManager::turnOffSound(micPos, sideDist, velY);
             SDL_UnlockAudio();
         }
         // printf("X: %f\n",velY[_numVertices/2]); //Print velocity for debugging

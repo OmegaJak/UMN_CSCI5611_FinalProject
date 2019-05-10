@@ -205,7 +205,7 @@ int main(int argc, char* argv[]) {
 
     SoundManager soundManager = SoundManager::getInstance();
     auto stringParams = StringParameters{50000, 0.3, 0.848, 0.755};
-    StringSim stringSim = StringSim(stringParams, 30, &soundManager);
+    StringSim stringSim = StringSim(stringParams, 30);
 
     ShaderManager::InitShaders();
 
