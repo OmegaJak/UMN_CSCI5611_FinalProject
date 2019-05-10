@@ -199,7 +199,7 @@ int main(int argc, char* argv[]) {
 
     Camera::getInstance();
 
-    Environment environment = Environment();
+    Environment::getInstance();
 
     ClothManager clothManager = ClothManager();
 
@@ -319,7 +319,7 @@ int main(int argc, char* argv[]) {
 
         if (SDL_GetMouseState(NULL, NULL) & SDL_BUTTON(SDL_BUTTON_LEFT) & ~SDL_BUTTON(SDL_BUTTON_RIGHT)) {
             lastMouseWorldCoord = Camera::getInstance().GetMousePosition(normalizedMouseX, normalizedMouseY, proj, gravityCenterDistance);
-            environment.SetGravityCenterPosition(lastMouseWorldCoord);
+            Environment::getInstance().SetGravityCenterPosition(lastMouseWorldCoord);
         }
 
         stringstream debugText;
@@ -336,11 +336,11 @@ int main(int argc, char* argv[]) {
         ShaderManager::ActivateShader(ShaderManager::EnvironmentShader);
         glBindBuffer(GL_ARRAY_BUFFER, ShaderManager::EnvironmentShader.VBO);
         TextureManager::Update(ShaderManager::EnvironmentShader.Program);
-        environment.UpdateAll();
+        Environment::getInstance().UpdateAll();
         glBindBuffer(GL_ARRAY_BUFFER, 0);
 
         ShaderManager::ActivateShader(ShaderManager::ClothShader);
-        clothManager.RenderParticles(deltaTime, &environment);
+        clothManager.RenderParticles(deltaTime);
 
         SDL_GL_SwapWindow(window);  // Double buffering
     }

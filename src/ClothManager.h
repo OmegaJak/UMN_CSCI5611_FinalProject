@@ -39,7 +39,7 @@ class ClothManager {
    public:
     ClothManager();
 
-    void RenderParticles(float dt, Environment *environment);
+    void RenderParticles(float dt);
     void InitGL();
     void UpdateComputeParameters() const;
     void ExecuteComputeShader();

@@ -4,6 +4,7 @@
 #include <iostream>
 #include "Camera.h"
 #include "minmax.h"
+#include "Environment.h"
 extern float timePassed;
 glm::vec3 RayTracer::listenerPoint;
 void RayTracer::shootThemAll(int index) {
@@ -16,8 +17,8 @@ void RayTracer::shootThemAll(int index) {
     const float AngleStep = 2 * M_PI / RayNumber;
     float angle = 0;
     for (int i = 0; i < RayNumber; ++i) {
-        Ray ray(glm::vec3(sourcPoint.x, sourcPoint.y, 0), glm::vec3(cos(angle), sin(angle), 0));
-        ray.trace(index);
+        Ray ray(glm::vec3(sourcPoint.x, sourcPoint.y, 0), glm::vec3(cos(angle), sin(angle), 0), index);
+        ray.trace();
         angle += AngleStep;
     }
 }
@@ -32,21 +33,53 @@ float RayTracer::Ray::hitListenr() {
     return MaxListenDis;
 }
 
-float RayTracer::Ray::hitWal(float listenerDis, int step) {
-    return MaxListenDis;
+bool RayTracer::Ray::hitWalls(float listenerDis, float travelDis) {
+	//return false;
+	auto& walls = Environment::getInstance().getWalls();
+	float minLength = listenerDis;
+	glm::vec3 hitNorm;
+	//const Environment::Wall* hitWall = nullptr;
+	for(const auto& w:walls){
+		float dis = glm::dot(-w._normal, (w._position-_start));
+		float cosTheta = glm::dot(_dir,-w._normal);
+		if(cosTheta == 0) continue;
+		float segLine = dis/cosTheta;
+		
+		if(segLine >= 0 && segLine < minLength) {
+			glm::vec3 hitSurfacePointToSurfacePosition = _start + segLine * _dir - w._position;
+			if(abs(hitSurfacePointToSurfacePosition.x) >= w._length
+				|| abs(hitSurfacePointToSurfacePosition.y) >= w._length)
+				continue;
+			minLength = std::min(minLength, dis/cosTheta);
+			hitNorm = w._normal;
+		}
+	}
+
+	
+	if(minLength < listenerDis) {
+		//_start = _start + (minLength-0.1f)*_dir;
+		_dir = -glm::dot(hitNorm, _dir) * hitNorm;
+		_start = hitNorm + 0.001f * _dir;
+		trace(minLength + travelDis);
+		return true;
+	}
+	return false;
+	
+    
     // if Hit wall recursive raytrace here
 }
 
-void RayTracer::Ray::trace(int index, int step) {	
+void RayTracer::Ray::trace(const float TravelDis) {
+	
+	if(TravelDis > MaxListenDis) return;
     float lDis = hitListenr();
-    float wDis = hitWal(lDis, step);
 
-    if (lDis < wDis) {
+	//if(TravelDis + glm::distance(_start, listenerPoint) >= MaxListenDis) return; // If hit directly is too far, there is no way to hit after reflection by any wall
+    if (!hitWalls(lDis, TravelDis) ) {
         // add current to buffer
-        SoundManager::addBuffer(timePassed, index);
+		//if(TravelDis) exit(42);
+		if(TravelDis + lDis < MaxListenDis)
+            SoundManager::addBuffer(timePassed + (TravelDis+lDis)/SoundSpeed, _index);
         //SoundManager::addBuffer(timePassed + 0.2, index);
-        // SoundManager::addBuffer(timePassed+0.8, index);
-        // SoundManager::addBuffer(timePassed+0.4, index);
-        // SoundManager::addBuffer(timePassed+0.6, index);
     }
 }

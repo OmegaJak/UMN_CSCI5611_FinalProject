@@ -227,7 +227,7 @@ void ClothManager::CopySamplesToAudioBuffer() {
     RayTracer::getInstance().shootThemAll(index);
 }
 
-void ClothManager::RenderParticles(float dt, Environment *environment) {
+void ClothManager::RenderParticles(float dt) {
     glBindBuffer(GL_ARRAY_BUFFER, ShaderManager::ClothShader.VBO);
 
     auto color = glm::vec3(101 / 255.0, 67 / 255.0, 33 / 255.0);

@@ -13,6 +13,9 @@ void Environment::UpdateAll() {
     for (auto gameObject : _gameObjects) {
         gameObject.Update();
     }
+	 for (auto gameObject : _walls) {
+        gameObject.Update();
+    }
 }
 
 void Environment::SetGravityCenterPosition(const glm::vec3& position) {
@@ -30,11 +33,17 @@ void Environment::CreateEnvironment() {
     // gameObject.material_.specFactor_ = 0.2;
     //_gameObjects.push_back(gameObject);
 
+	/*
     gameObject = GameObject(_cubeModel);  // reference person
     gameObject.SetTextureIndex(TEX1);
     gameObject.SetScale(1, 0, -3);
     gameObject.SetPosition(glm::vec3(-25, 13, 1.5));
     _gameObjects.push_back(gameObject);
+	*/
+
+	Wall wall;
+	wall = Wall(glm::vec3(10,0,0), glm::vec3(1,0,0), 50.f,_cubeModel);
+	_walls.push_back(wall);
 
     gameObject = GameObject(_sphereModel);
     gameObject.SetTextureIndex(UNTEXTURED);
@@ -43,4 +52,7 @@ void Environment::CreateEnvironment() {
     gameObject.SetScale(8, 8, 8);
     _gameObjects.push_back(gameObject);
     _gravityCenterIndex = _gameObjects.size() - 1;
+
+
+
 }
