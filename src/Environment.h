@@ -15,20 +15,20 @@ class Environment {
 		glm::vec3 _normal;
 		float _length;
 		Wall(glm::vec3 pos, glm::vec3 n, float l, Model* model):GameObject(model), _position(pos), _normal(n), _length(l){
-			SetTextureIndex(UNTEXTURED);
-		    SetColor(glm::vec3(0, 0, 0));
+			SetTextureIndex(TEX1);
+		    SetColor(glm::vec3(0, 1, 0));
 			SetPosition(_position);
 			glm::normalize(_normal);
 			// TODO: rotation doesn't work...
-			EulerRotate(45,.0f,.0f);
+			//EulerRotate(45,.0f,.0f);
 
-			SetScale(-l*_normal.y, -l* _normal.x, l);
+			SetScale(-l*_normal.y+0.1f, -l* _normal.x+0.1f, l);
 		}
 		Wall() = default;
 
 	};
 
-	std::vector<Wall>& getWalls(){return _walls;}
+	const std::vector<Wall>& getWalls(){return _walls;}
    private:
 	Environment();
     void CreateEnvironment();

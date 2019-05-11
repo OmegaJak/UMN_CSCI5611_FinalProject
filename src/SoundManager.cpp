@@ -84,7 +84,7 @@ void SoundManager::sumSoundsOntime() {
         --_SmartBuff[index];
     }
     // TODO: figure out a decent way for anti distortion
-    for (int i = 0; i < SampleNum; ++i) tmpBuff[i] *= 42.f / RayTracer::RayNumber;
+    for (int i = 0; i < SampleNum; ++i) tmpBuff[i] *= 0.4f;
     copyToSoundBuffer(tmpBuff, SampleNum);
 }
 

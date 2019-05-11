@@ -20,11 +20,9 @@ void TextureManager::InitTextures() {
     SDL_Surface* surface = IMG_Load("images/house_stark_flag_by_achaley.png");
     glActiveTexture(GL_TEXTURE0);
     InitTexture(&tex0, surface);
-
     glActiveTexture(GL_TEXTURE1);
-    surface = IMG_Load("images/person.png");
+    surface = IMG_Load("images/Wall.jpg");
     InitTexture(&tex1, surface);
-
     glActiveTexture(GL_TEXTURE2);
     surface = IMG_Load("images/circle.png");
     InitTexture(&tex2, surface);

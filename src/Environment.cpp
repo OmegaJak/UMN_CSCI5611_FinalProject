@@ -40,10 +40,11 @@ void Environment::CreateEnvironment() {
     gameObject.SetPosition(glm::vec3(-25, 13, 1.5));
     _gameObjects.push_back(gameObject);
 	*/
-
-	Wall wall;
-	wall = Wall(glm::vec3(10,0,0), glm::vec3(1,0,0), 50.f,_cubeModel);
-	_walls.push_back(wall);
+	const float WallScale = 42;
+	_walls.push_back(Wall(glm::vec3(-WallScale,0,0), glm::vec3(1,0,0), 2*WallScale,_cubeModel));
+	//_walls.push_back(Wall(glm::vec3(WallScale,0,0), glm::vec3(-1,0,0), 2*WallScale,_cubeModel));
+	//_walls.push_back(Wall(glm::vec3(0,WallScale,0), glm::vec3(0,-1,0), 2*WallScale,_cubeModel));
+	//_walls.push_back(Wall(glm::vec3(0,-WallScale,0), glm::vec3(0,1,0), 2*WallScale,_cubeModel));
 
     gameObject = GameObject(_sphereModel);
     gameObject.SetTextureIndex(UNTEXTURED);

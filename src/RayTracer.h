@@ -4,11 +4,11 @@ class RayTracer {
    public:
     enum {
         RayNumber = 1024,
-        ListenerRadius = 10,
+        ListenerRadius = 1,
         // use one of them to stop raytrace
-        MaxReflection = 5,
-        MaxListenDis = 420,
-		SoundSpeed = 34,
+        
+		SoundSpeed = 340,
+		MaxListenDis = SoundSpeed * 2,
     };
 	class Ray {
         glm::vec3 _start;

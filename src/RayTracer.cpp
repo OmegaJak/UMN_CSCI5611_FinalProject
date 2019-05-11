@@ -33,12 +33,15 @@ float RayTracer::Ray::hitListenr() {
     return MaxListenDis;
 }
 
+float random(){
+	return (2*rand()-(float)RAND_MAX)/(float)RAND_MAX;
+}
 bool RayTracer::Ray::hitWalls(float listenerDis, float travelDis) {
 	//return false;
 	auto& walls = Environment::getInstance().getWalls();
 	float minLength = listenerDis;
 	glm::vec3 hitNorm;
-	//const Environment::Wall* hitWall = nullptr;
+
 	for(const auto& w:walls){
 		float dis = glm::dot(-w._normal, (w._position-_start));
 		float cosTheta = glm::dot(_dir,-w._normal);
@@ -54,32 +57,31 @@ bool RayTracer::Ray::hitWalls(float listenerDis, float travelDis) {
 			hitNorm = w._normal;
 		}
 	}
-
 	
 	if(minLength < listenerDis) {
-		//_start = _start + (minLength-0.1f)*_dir;
+		_start = _start + (minLength-0.001f)*_dir;
 		_dir = -glm::dot(hitNorm, _dir) * hitNorm;
-		_start = hitNorm + 0.001f * _dir;
+		//_dir=_dir/glm::length(_dir);
+		const float ReflectScope = 4;
+		float r = ReflectScope*random();
+		_dir = glm::normalize(_dir);
+		//std::cout<<_dir.x <<"y"<<_dir.y<<std::endl;
+		//_dir.x += r*_dir.y;
+		//_dir.y += r*_dir.x;
+		//_dir = glm::normalize(_dir);
+		
+		
 		trace(minLength + travelDis);
 		return true;
 	}
 	return false;
-	
-    
-    // if Hit wall recursive raytrace here
 }
 
 void RayTracer::Ray::trace(const float TravelDis) {
-	
 	if(TravelDis > MaxListenDis) return;
     float lDis = hitListenr();
-
-	//if(TravelDis + glm::distance(_start, listenerPoint) >= MaxListenDis) return; // If hit directly is too far, there is no way to hit after reflection by any wall
-    if (!hitWalls(lDis, TravelDis) ) {
-        // add current to buffer
-		//if(TravelDis) exit(42);
-		if(TravelDis + lDis < MaxListenDis)
-            SoundManager::addBuffer(timePassed + (TravelDis+lDis)/SoundSpeed, _index);
-        //SoundManager::addBuffer(timePassed + 0.2, index);
+    if (!hitWalls(lDis, TravelDis) 
+		&& (TravelDis + lDis < MaxListenDis) ){
+		SoundManager::addBuffer(timePassed + (TravelDis+lDis)/SoundSpeed, _index);
     }
 }
