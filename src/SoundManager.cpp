@@ -74,6 +74,11 @@ void SoundManager::copyToSoundBuffer(float* samples, int numSamplesToGenerate) {
     }
 }
 void SoundManager::sumSoundsOntime() {
+	static unsigned char count = 0;
+	count++;
+	count = count % 16;
+	if(count != 0) return;
+
     static float tmpBuff[SampleNum];
     memset(tmpBuff, 0, sizeof(tmpBuff));
     while (!_q.empty() && -_q.top().first < timePassed) {
@@ -84,7 +89,7 @@ void SoundManager::sumSoundsOntime() {
         --_SmartBuff[index];
     }
     // TODO: figure out a decent way for anti distortion
-    for (int i = 0; i < SampleNum; ++i) tmpBuff[i] *= 0.4f;
+    //for (int i = 0; i < SampleNum; ++i) tmpBuff[i] *= 0.4f;
     copyToSoundBuffer(tmpBuff, SampleNum);
 }
 

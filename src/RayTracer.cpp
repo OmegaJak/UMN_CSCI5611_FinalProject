@@ -7,6 +7,9 @@
 #include "Environment.h"
 extern float timePassed;
 glm::vec3 RayTracer::listenerPoint;
+const float RayTracer::ListenerRadius = 0.5;
+const float RayTracer::SoundLastingTime = 1.5;
+const float RayTracer::MaxListenDis = SoundLastingTime * SoundSpeed;
 void RayTracer::shootThemAll(int index) {
     // TODO: get current source positon from cloth manager
     const glm::vec3 sourcPoint = glm::vec3(0, 0, 0);
@@ -27,9 +30,11 @@ float RayTracer::Ray::hitListenr() {
     float projecLength = glm::dot(_dir, (listenerPoint - _start));
     if (projecLength <= 0 || projecLength > MaxListenDis) {
         // prune useless calculation
-    } else if (glm::distance(_start + projecLength * _dir, listenerPoint) <= ListenerRadius)
-        return projecLength;
-
+    } else if (glm::distance(_start + projecLength * _dir, listenerPoint) <= ListenerRadius){
+		//std::cout<<projecLength<<std::endl;
+		return projecLength;
+	}
+	
     return MaxListenDis;
 }
 
@@ -50,8 +55,8 @@ bool RayTracer::Ray::hitWalls(float listenerDis, float travelDis) {
 		
 		if(segLine >= 0 && segLine < minLength) {
 			glm::vec3 hitSurfacePointToSurfacePosition = _start + segLine * _dir - w._position;
-			if(abs(hitSurfacePointToSurfacePosition.x) >= w._length
-				|| abs(hitSurfacePointToSurfacePosition.y) >= w._length)
+			if(2*abs(hitSurfacePointToSurfacePosition.x) >= w._length
+				|| 2*abs(hitSurfacePointToSurfacePosition.y) >= w._length)
 				continue;
 			minLength = std::min(minLength, dis/cosTheta);
 			hitNorm = w._normal;
@@ -61,14 +66,13 @@ bool RayTracer::Ray::hitWalls(float listenerDis, float travelDis) {
 	if(minLength < listenerDis) {
 		_start = _start + (minLength-0.001f)*_dir;
 		_dir = -glm::dot(hitNorm, _dir) * hitNorm;
-		//_dir=_dir/glm::length(_dir);
-		const float ReflectScope = 4;
+		const float ReflectScope = 2;
 		float r = ReflectScope*random();
 		_dir = glm::normalize(_dir);
 		//std::cout<<_dir.x <<"y"<<_dir.y<<std::endl;
-		//_dir.x += r*_dir.y;
-		//_dir.y += r*_dir.x;
-		//_dir = glm::normalize(_dir);
+		_dir.x += r*_dir.y;
+		_dir.y += r*_dir.x;
+		_dir = glm::normalize(_dir);
 		
 		
 		trace(minLength + travelDis);
@@ -80,8 +84,10 @@ bool RayTracer::Ray::hitWalls(float listenerDis, float travelDis) {
 void RayTracer::Ray::trace(const float TravelDis) {
 	if(TravelDis > MaxListenDis) return;
     float lDis = hitListenr();
-    if (!hitWalls(lDis, TravelDis) 
-		&& (TravelDis + lDis < MaxListenDis) ){
+	
+    if (!hitWalls(lDis, TravelDis)){
+		//std::cout<<"lDis"<<lDis<<std::endl<<"TravelDis"<<TravelDis<<std::endl;
+		if(TravelDis + lDis < MaxListenDis) 
 		SoundManager::addBuffer(timePassed + (TravelDis+lDis)/SoundSpeed, _index);
     }
 }

@@ -41,10 +41,45 @@ void Environment::CreateEnvironment() {
     _gameObjects.push_back(gameObject);
 	*/
 	const float WallScale = 42;
-	_walls.push_back(Wall(glm::vec3(-WallScale,0,0), glm::vec3(1,0,0), 2*WallScale,_cubeModel));
+	_walls.push_back(Wall(glm::vec3(-2*WallScale,0,0), glm::vec3(1,0,0), 2*WallScale,_cubeModel));
+	_walls.push_back(Wall(glm::vec3(-2*WallScale,2*WallScale,0), glm::vec3(1,0,0), 2*WallScale,_cubeModel));
+	_walls.push_back(Wall(glm::vec3(-2*WallScale,-2*WallScale,0), glm::vec3(1,0,0), 2*WallScale,_cubeModel));
+
+	_walls.push_back(Wall(glm::vec3(-WallScale,3*WallScale,0), glm::vec3(0,-1,0), 2*WallScale,_cubeModel));
+	_walls.push_back(Wall(glm::vec3(-WallScale,-3*WallScale,0), glm::vec3(0,-1,0), 2*WallScale,_cubeModel));
+	_walls.push_back(Wall(glm::vec3(WallScale,3*WallScale,0), glm::vec3(0,-1,0), 2*WallScale,_cubeModel));
+	_walls.push_back(Wall(glm::vec3(WallScale,-3*WallScale,0), glm::vec3(0,-1,0), 2*WallScale,_cubeModel));
+	_walls.push_back(Wall(glm::vec3(3*WallScale,3*WallScale,0), glm::vec3(0,-1,0), 2*WallScale,_cubeModel));
+	_walls.push_back(Wall(glm::vec3(3*WallScale,-3*WallScale,0), glm::vec3(0,-1,0), 2*WallScale,_cubeModel));
+
+	_walls.push_back(Wall(glm::vec3(4*WallScale,2*WallScale,0), glm::vec3(1,0,0), 2*WallScale,_cubeModel));
+	_walls.push_back(Wall(glm::vec3(4*WallScale,-2*WallScale,0), glm::vec3(1,0,0), 2*WallScale,_cubeModel));
+
+	_walls.push_back(Wall(glm::vec3(5*WallScale,3*WallScale,0), glm::vec3(0,-1,0), 2*WallScale,_cubeModel));
+	_walls.push_back(Wall(glm::vec3(5*WallScale,-3*WallScale,0), glm::vec3(0,-1,0), 2*WallScale,_cubeModel));
+
+	_walls.push_back(Wall(glm::vec3(6*WallScale,0,0), glm::vec3(1,0,0), 2*WallScale,_cubeModel));
+	_walls.push_back(Wall(glm::vec3(6*WallScale,2*WallScale,0), glm::vec3(1,0,0), 2*WallScale,_cubeModel));
+	_walls.push_back(Wall(glm::vec3(6*WallScale,-2*WallScale,0), glm::vec3(1,0,0), 2*WallScale,_cubeModel));
+
+	/*
+	_walls.push_back(Wall(glm::vec3(-WallScale,WallScale,0), glm::vec3(1,0,0), 2*WallScale,_cubeModel));
+	_walls.push_back(Wall(glm::vec3(-WallScale,-WallScale,0), glm::vec3(1,0,0), 2*WallScale,_cubeModel));
+	_walls.push_back(Wall(glm::vec3(-WallScale,-3*WallScale,0), glm::vec3(1,0,0), 2*WallScale,_cubeModel));
+	_walls.push_back(Wall(glm::vec3(-WallScale,3*WallScale,0), glm::vec3(1,0,0), 2*WallScale,_cubeModel));
 	//_walls.push_back(Wall(glm::vec3(WallScale,0,0), glm::vec3(-1,0,0), 2*WallScale,_cubeModel));
-	//_walls.push_back(Wall(glm::vec3(0,WallScale,0), glm::vec3(0,-1,0), 2*WallScale,_cubeModel));
+	_walls.push_back(Wall(glm::vec3(0,4*WallScale,0), glm::vec3(0,-1,0), 2*WallScale,_cubeModel));
+	_walls.push_back(Wall(glm::vec3(0,-4*WallScale,0), glm::vec3(0,-1,0), 2*WallScale,_cubeModel));
+	_walls.push_back(Wall(glm::vec3(2*WallScale,4*WallScale,0), glm::vec3(0,-1,0), 2*WallScale,_cubeModel));
+	_walls.push_back(Wall(glm::vec3(2*WallScale,-4*WallScale,0), glm::vec3(0,-1,0), 2*WallScale,_cubeModel));
+
+
+	_walls.push_back(Wall(glm::vec3(3*WallScale,3*WallScale,0), glm::vec3(1,0,0), 2*WallScale,_cubeModel));
+	_walls.push_back(Wall(glm::vec3(3*WallScale,-3*WallScale,0), glm::vec3(1,0,0), 2*WallScale,_cubeModel));
+	_walls.push_back(Wall(glm::vec3(3*WallScale,-WallScale,0), glm::vec3(1,0,0), 2*WallScale,_cubeModel));
+	*/
 	//_walls.push_back(Wall(glm::vec3(0,-WallScale,0), glm::vec3(0,1,0), 2*WallScale,_cubeModel));
+	//_walls.push_back(Wall(glm::vec3(2*WallScale,WallScale,0), glm::vec3(0,1,0), 2*WallScale,_cubeModel));
 
     gameObject = GameObject(_sphereModel);
     gameObject.SetTextureIndex(UNTEXTURED);

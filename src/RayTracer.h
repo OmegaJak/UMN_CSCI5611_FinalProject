@@ -4,12 +4,14 @@ class RayTracer {
    public:
     enum {
         RayNumber = 1024,
-        ListenerRadius = 1,
+        //ListenerRadius = 1,
         // use one of them to stop raytrace
         
 		SoundSpeed = 340,
-		MaxListenDis = SoundSpeed * 2,
     };
+	static const float ListenerRadius;
+	static const float SoundLastingTime;
+	static const float MaxListenDis;
 	class Ray {
         glm::vec3 _start;
         glm::vec3 _dir;

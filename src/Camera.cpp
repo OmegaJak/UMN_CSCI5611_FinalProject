@@ -11,7 +11,7 @@
 
 Camera::Camera() {
     //_position = glm::vec3(15, 8, 12.5);
-	_position = glm::vec3(15, 8, 0);
+	_position = glm::vec3(185, 8, 0);
     _forward = glm::vec3(1, 0, 0);
     _worldUp = _up = glm::vec3(0, 0, 1);
 

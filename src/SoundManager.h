@@ -6,7 +6,7 @@
 class SoundManager {
    public:
     enum {
-        BUfferNumber = 1024,  // nearly 2 seconds sound when fps is about 60
+        BUfferNumber = 512,  // nearly 2 seconds sound when fps is about 60
         SampleNum = SAMPLES_PER_FRAME,
     };
     static const int soundBuffSize = 104 * 1024;
