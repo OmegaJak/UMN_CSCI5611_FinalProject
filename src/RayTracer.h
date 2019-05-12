@@ -15,9 +15,9 @@ class RayTracer {
 		int _index;
 	  public:
         Ray(glm::vec3 start, glm::vec3 dir, int i) : _start(start), _dir(dir),_index(i) {}
-        void trace(const float travelDis = 0);
+        void trace(const float travelDis = 0, const int step = 1);
         float hitListenr();
-        bool hitWalls(float listenerDis, float);
+        bool hitWalls(float listenerDis, float, const int Step);
     };
 
    private:

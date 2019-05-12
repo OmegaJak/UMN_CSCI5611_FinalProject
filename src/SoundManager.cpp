@@ -12,7 +12,7 @@ int SoundManager::_SmartBuff[SoundManager::BUfferNumber];
 float SoundManager::_playBuff[SoundManager::soundBuffSize];
 int SoundManager::_bufferCount = 0;
 bool SoundManager::printSamples = false;
-std::priority_queue<std::pair<float, unsigned int>> SoundManager::_q;
+std::priority_queue<std::pair<float, std::pair<unsigned int, unsigned int>>> SoundManager::_q;
 
 extern float timePassed;
 extern bool isEchoOn;
@@ -78,18 +78,18 @@ void SoundManager::sumSoundsOntime() {
 	static unsigned char count = 0;
 	if (isEchoOn) {
 		count++;
-		count = count % 16;
+		count = count % 8;
 		if(count != 0) return;
 	}
-
 
     static float tmpBuff[SampleNum];
     memset(tmpBuff, 0, sizeof(tmpBuff));
     while (!_q.empty() && -_q.top().first < timePassed) {
-        unsigned int index = _q.top().second;
+        unsigned int index = _q.top().second.first;
+		unsigned int step = _q.top().second.second;
         // printf("Get buffer Index %u\n",  index);
         _q.pop();
-        for (int i = 0; i < SampleNum; ++i) tmpBuff[i] += soundBuffs[index][i];
+        for (int i = 0; i < SampleNum; ++i) tmpBuff[i] += soundBuffs[index][i]/step;
         --_SmartBuff[index];
     }
     // TODO: figure out a decent way for anti distortion
@@ -154,7 +154,7 @@ void SoundManager::audio_callback(void* beeper_, Uint8* stream_, int len_) {
     }
 }
 
-void SoundManager::addBuffer(float time, unsigned int index) {
+void SoundManager::addBuffer(float time, unsigned int index, unsigned int step) {
     ++_SmartBuff[index];
-    _q.push(std::make_pair(-time, index));
+    _q.push(std::make_pair(-time, std::make_pair(index, step)));
 }

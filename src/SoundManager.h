@@ -19,7 +19,7 @@ class SoundManager {
     static double GetAmplitude(float sample);
 
     static unsigned int findNextFreeBuff();
-    static std::priority_queue<std::pair<float, unsigned int>> _q;  // too lazy to right a cmp, store negative time instead.
+    static std::priority_queue<std::pair<float, std::pair<unsigned int, unsigned int>>> _q;  // too lazy to right a cmp, store negative time instead.
     static int _SmartBuff[BUfferNumber];
     static const short ToneVolume = 1000;
     static float _playBuff[SoundManager::soundBuffSize];
@@ -37,7 +37,7 @@ class SoundManager {
         static SoundManager instance(48000);
         return instance;
     }
-    static void addBuffer(float time, unsigned int index);
+    static void addBuffer(float time, unsigned int index, unsigned int step);
 
     static void turnOffSound(int micPos, int sideDist, double* velY) {
         _playBuff[lastSimulationSampleIndex++] = .5 * velY[micPos] + .25 * velY[micPos - sideDist] + .25 * velY[micPos + sideDist];

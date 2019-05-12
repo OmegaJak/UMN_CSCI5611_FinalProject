@@ -42,7 +42,7 @@ float RayTracer::Ray::hitListenr() {
 float random(){
 	return (2*rand()-(float)RAND_MAX)/(float)RAND_MAX;
 }
-bool RayTracer::Ray::hitWalls(float listenerDis, float travelDis) {
+bool RayTracer::Ray::hitWalls(float listenerDis, float travelDis, const int Step) {
 	if(!isEchoOn) return false;
 	auto& walls = Environment::getInstance().getWalls();
 	float minLength = listenerDis;
@@ -74,19 +74,18 @@ bool RayTracer::Ray::hitWalls(float listenerDis, float travelDis) {
 		//_dir.y += r*_dir.x;
 		//_dir = glm::normalize(_dir);
 		
-		trace(minLength + travelDis);
+		trace(minLength + travelDis, Step+1);
 		return true;
 	}
 	return false;
 }
 
-void RayTracer::Ray::trace(const float TravelDis) {
+void RayTracer::Ray::trace(const float TravelDis, const int step) {
 	if(TravelDis > MaxListenDis) return;
     float lDis = hitListenr();
 	
-    if (!hitWalls(lDis, TravelDis)
+    if (!hitWalls(lDis, TravelDis, step)
 		&& (TravelDis + lDis < MaxListenDis)) {
-	
-		SoundManager::addBuffer(timePassed + (TravelDis+lDis)/SoundSpeed, _index);
+		SoundManager::addBuffer(timePassed + (TravelDis+lDis)/SoundSpeed, _index, step);
     }
 }
