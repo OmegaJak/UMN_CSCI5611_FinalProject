@@ -62,8 +62,8 @@ void SoundManager::InitSound(int samplesPerSecond) {
 
 double SoundManager::GetAmplitude(float sample) {
     static double tripToneVol = 3 * ToneVolume;
-    double amp = ToneVolume * 2 * sample;                                               // amplitude
-    //amp = amp > tripToneVol ? tripToneVol : (amp < -tripToneVol ? -tripToneVol : amp);  // clamp
+    double amp = ToneVolume * 2 * sample;  // amplitude
+    // amp = amp > tripToneVol ? tripToneVol : (amp < -tripToneVol ? -tripToneVol : amp);  // clamp
     return amp;
 }
 

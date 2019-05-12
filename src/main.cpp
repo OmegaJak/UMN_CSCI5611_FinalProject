@@ -190,7 +190,7 @@ int main(int argc, char* argv[]) {
     // https://learnopengl.com/In-Practice/Debugging
     GLint flags;
     glGetIntegerv(GL_CONTEXT_FLAGS, &flags);
-    if (flags & GL_CONTEXT_FLAG_DEBUG_BIT) {
+    if (flags & GL_CONTEXT_FLAG_DEBUG_BIT && false) {
         glEnable(GL_DEBUG_OUTPUT);
         glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
         glDebugMessageCallback(glDebugOutput, nullptr);
@@ -234,7 +234,10 @@ int main(int argc, char* argv[]) {
     float normalizedMouseX, normalizedMouseY;
     glm::vec3 lastMouseWorldCoord;
     float gravityCenterDistance = 10;
-	srand(time(NULL));
+    float currentParameterBaseMod = 0;
+    string currentParameterName = "";
+    float* currentParameter = nullptr;
+    srand(time(NULL));
     while (!quit) {
         while (SDL_PollEvent(&windowEvent)) {  // inspect all events in the queue
             if (windowEvent.type == SDL_QUIT) quit = true;
@@ -254,20 +257,55 @@ int main(int argc, char* argv[]) {
                     gravityCenterDistance += modAmount;
                 } else if (windowEvent.key.keysym.sym >= SDLK_1 && windowEvent.key.keysym.sym <= SDLK_8) {
                     int index = windowEvent.key.keysym.sym - SDLK_1;  // Character math... I'm sorry
-                    clothManager.Pluck(index, 0.6);
+                    clothManager.Pluck(index, 0.6, 0);
                 } else if (windowEvent.type == SDL_KEYUP && windowEvent.key.keysym.sym == SDLK_k) {
                     SoundManager::togglePrintSamples();
                 } else if (windowEvent.type == SDL_KEYUP && windowEvent.key.keysym.sym == SDLK_m) {
 					isEchoOn = !isEchoOn;
                 }
-            } else if (windowEvent.type == SDL_KEYDOWN) {
-                /*if (windowEvent.key.keysym.sym == SDLK_SPACE) {
-                    if (clothManager.simParameters.dt > 0) {
-                        clothManager.simParameters.dt = 0;
-                    } else {
-                        clothManager.simParameters.dt = COMPUTE_SHADER_TIMESTEP;
-                    }
-                }*/
+            } else if (windowEvent.key.keysym.sym == SDLK_EQUALS || windowEvent.key.keysym.sym == SDLK_MINUS) {
+                float modAmount = currentParameterBaseMod;
+                if (windowEvent.key.keysym.sym == SDLK_MINUS) modAmount *= -1;
+                if (windowEvent.key.keysym.mod & KMOD_SHIFT) modAmount *= 10;
+                if (windowEvent.key.keysym.mod & KMOD_CTRL) modAmount *= 0.1;
+
+                if (currentParameter != nullptr) *currentParameter += modAmount;
+                clothManager.GenerateStringParams();
+                clothManager.InitializeStringPositions();
+            } else if (windowEvent.key.keysym.sym >= SDLK_KP_1 && windowEvent.key.keysym.sym <= SDLK_KP_6) {
+                // I'm sorry
+                switch (windowEvent.key.keysym.sym - SDLK_KP_1) {
+                    case 0:
+                        currentParameterBaseMod = 0.001;
+                        currentParameterName = "dt";
+                        currentParameter = &clothManager.dt;
+                        break;
+                    case 1:
+                        currentParameterBaseMod = 250;
+                        currentParameterName = "baseKs";
+                        currentParameter = &clothManager.baseKs;
+                        break;
+                    case 2:
+                        currentParameterBaseMod = 250;
+                        currentParameterName = "deltaKs";
+                        currentParameter = &clothManager.deltaKs;
+                        break;
+                    case 3:
+                        currentParameterBaseMod = 0.01;
+                        currentParameterName = "kd";
+                        currentParameter = &clothManager.kd;
+                        break;
+                    case 4:
+                        currentParameterBaseMod = 0.01;
+                        currentParameterName = "restLength";
+                        currentParameter = &clothManager.restLength;
+                        break;
+                    case 5:
+                        currentParameterBaseMod = 0.5;
+                        currentParameterName = "massDist";
+                        currentParameter = &clothManager.distanceBetweenMasses;
+                        break;
+                }
             }
 
             if (SDL_GetMouseState(NULL, NULL) & SDL_BUTTON(SDL_BUTTON_RIGHT)) {  // Right click is down
@@ -330,10 +368,12 @@ int main(int argc, char* argv[]) {
         }
 
         stringstream debugText;
-        debugText << fixed << setprecision(3) << " | " << lastAverageFrameTime << " per frame (" << lastFramerate << "FPS) average over "
+        debugText << fixed << setprecision(3) << " | " << lastAverageFrameTime << " per frame (" << lastFramerate << "FPS) avg over "
                   << framesPerSample << " frames "
-                  << " | cameraPosition: " << Camera::getInstance().GetPosition() << " | CoG position: " << lastMouseWorldCoord;
-        //<< " | Sim running: " << (clothManager.simParameters.dt > 0);
+                  << " | cameraPosition: " << Camera::getInstance().GetPosition() << " | dt: " << clothManager.dt
+                  << ", baseKs: " << clothManager.baseKs << ", deltaKs: " << clothManager.deltaKs << ", kd: " << clothManager.kd
+                  << ", restLength: " << clothManager.restLength << ", massDist: " << clothManager.distanceBetweenMasses
+                  << " | currentlyEditing: " << currentParameterName;
         SDL_SetWindowTitle(window, debugText.str().c_str());
 
         // Simulate using compute shader

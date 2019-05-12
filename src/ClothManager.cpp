@@ -29,16 +29,29 @@ bool ClothManager::ready = false;
 
 ClothManager::ClothManager() {
     srand(time(NULL));
-    for (int i = 0; i < 8; i++) {
-        stringParameters[i] = stringParams{0.008,              // dt
-                                           5000 + i * 5000.f,  // ks
-                                           0.0,                // kd
-                                           0.9,                // restLength
-                                           MASSES_PER_STRING / 2,
-                                           MASSES_PER_STRING / 3};
-    }
+    GenerateStringParams();
     globalSimParameters = simParams{SAMPLES_PER_FRAME};
     InitGL();
+}
+
+void ClothManager::GenerateStringParams() {
+    for (int i = 0; i < 8; i++) {
+        stringParameters[i] =
+            stringParams{dt, baseKs + i * deltaKs, kd, restLength * distanceBetweenMasses, MASSES_PER_STRING / 2, MASSES_PER_STRING / 3};
+    }
+}
+
+void ClothManager::InitializeStringPositions() {
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, posSSbo);
+    position *positions = (position *)glMapBufferRange(GL_SHADER_STORAGE_BUFFER, 0, TOTAL_NUM_MASSES * sizeof(position), bufMask);
+    for (int stringIndex = 0; stringIndex < NUM_STRINGS; stringIndex++) {
+        for (int i = 0; i < MASSES_PER_STRING; i++) {
+            int index = stringIndex * MASSES_PER_STRING + i;
+            positions[index] = {float(stringIndex), i * distanceBetweenMasses, 1.0f,
+                                BASE_HEIGHT};  // TODO: Why am I setting w here and is this messing things up (probably not)
+        }
+    }
+    glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
 }
 
 void ClothManager::InitGL() {
@@ -48,15 +61,7 @@ void ClothManager::InitGL() {
     glBufferData(GL_SHADER_STORAGE_BUFFER, TOTAL_NUM_MASSES * sizeof(position), nullptr, GL_DYNAMIC_DRAW);
 
     printf("Initializing mass positions...\n");
-    position *positions = (position *)glMapBufferRange(GL_SHADER_STORAGE_BUFFER, 0, TOTAL_NUM_MASSES * sizeof(position), bufMask);
-    for (int stringIndex = 0; stringIndex < NUM_STRINGS; stringIndex++) {
-        for (int i = 0; i < MASSES_PER_STRING; i++) {
-            int index = stringIndex * MASSES_PER_STRING + i;
-            positions[index] = {float(stringIndex), float(i), 1.0f,
-                                BASE_HEIGHT};  // TODO: Why am I setting w here and is this messing things up (probably not)
-        }
-    }
-    glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
+    InitializeStringPositions();
     ////
 
     // Prepare the mass parameters buffer //
@@ -188,7 +193,7 @@ void ClothManager::ExecuteComputeShader() {
     ready = true;
 }
 
-void ClothManager::Pluck(int stringIndex, float strength, int location) {
+void ClothManager::Pluck(int stringIndex, float strength, int method, int location) {
     assert(stringIndex < NUM_STRINGS);
 
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, posSSbo);
@@ -196,15 +201,31 @@ void ClothManager::Pluck(int stringIndex, float strength, int location) {
         (position *)glMapBufferRange(GL_SHADER_STORAGE_BUFFER, 0, TOTAL_NUM_MASSES * sizeof(position), GL_MAP_READ_BIT | GL_MAP_WRITE_BIT);
 
     double d = strength * stringParameters[stringIndex].restLength;  // scale pluck with string size
-    if (location == -1) location = (stringIndex * MASSES_PER_STRING) + (MASSES_PER_STRING / 2);
-    positions[location].z += d;
-    positions[location - 1].z += d / 2;
-    positions[location + 1].z += d / 2;
-    positions[location - 2].z += d / 2;
-    positions[location + 2].z += d / 2;
-    /*for (int i = 0; i < NUM_MASSES; i++) {
-        positions[i].z += 1;
-    }*/
+    if (location == -1) location = (MASSES_PER_STRING / 2);
+    location = location + stringIndex * MASSES_PER_STRING;
+    if (method == 0) {
+        positions[location].z += d;
+        positions[location - 1].z += d / 2;
+        positions[location + 1].z += d / 2;
+        positions[location - 2].z += d / 2;
+        positions[location + 2].z += d / 2;
+    } else if (method == 1) {
+        // Linear pluck
+        int minIndex = stringIndex * MASSES_PER_STRING;
+        int maxIndex = stringIndex * MASSES_PER_STRING + MASSES_PER_STRING;
+        for (int i = minIndex; i < maxIndex; i++) {
+            float displacement = 0;
+            if (i < location) {
+                displacement = (1.0f - (float(location - i) / float(location - minIndex))) * d;
+            } else if (i == location) {
+                displacement = d;
+            } else if (i > location) {
+                displacement = (1.0f - (float(i - location) / float(maxIndex - 1 - location))) * d;
+            }
+
+            positions[i].z += displacement;
+        }
+    }
 
     glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
 }
