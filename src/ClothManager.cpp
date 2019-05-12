@@ -36,8 +36,22 @@ ClothManager::ClothManager() {
 
 void ClothManager::GenerateStringParams() {
     for (int i = 0; i < 8; i++) {
-        stringParameters[i] = stringParams{dt, baseKs + i * deltaKs, kd, restLength, MASSES_PER_STRING / 2, MASSES_PER_STRING / 3};
+        stringParameters[i] =
+            stringParams{dt, baseKs + i * deltaKs, kd, restLength * distanceBetweenMasses, MASSES_PER_STRING / 2, MASSES_PER_STRING / 3};
     }
+}
+
+void ClothManager::InitializeStringPositions() {
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, posSSbo);
+    position *positions = (position *)glMapBufferRange(GL_SHADER_STORAGE_BUFFER, 0, TOTAL_NUM_MASSES * sizeof(position), bufMask);
+    for (int stringIndex = 0; stringIndex < NUM_STRINGS; stringIndex++) {
+        for (int i = 0; i < MASSES_PER_STRING; i++) {
+            int index = stringIndex * MASSES_PER_STRING + i;
+            positions[index] = {float(stringIndex), i * distanceBetweenMasses, 1.0f,
+                                BASE_HEIGHT};  // TODO: Why am I setting w here and is this messing things up (probably not)
+        }
+    }
+    glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
 }
 
 void ClothManager::InitGL() {
@@ -47,15 +61,7 @@ void ClothManager::InitGL() {
     glBufferData(GL_SHADER_STORAGE_BUFFER, TOTAL_NUM_MASSES * sizeof(position), nullptr, GL_DYNAMIC_DRAW);
 
     printf("Initializing mass positions...\n");
-    position *positions = (position *)glMapBufferRange(GL_SHADER_STORAGE_BUFFER, 0, TOTAL_NUM_MASSES * sizeof(position), bufMask);
-    for (int stringIndex = 0; stringIndex < NUM_STRINGS; stringIndex++) {
-        for (int i = 0; i < MASSES_PER_STRING; i++) {
-            int index = stringIndex * MASSES_PER_STRING + i;
-            positions[index] = {float(stringIndex), float(i), 1.0f,
-                                BASE_HEIGHT};  // TODO: Why am I setting w here and is this messing things up (probably not)
-        }
-    }
-    glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
+    InitializeStringPositions();
     ////
 
     // Prepare the mass parameters buffer //

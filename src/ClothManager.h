@@ -47,6 +47,7 @@ class ClothManager {
     void Pluck(int stringIndex, float strength = 0.1, int location = -1);
     void CopySamplesToAudioBuffer();
     void GenerateStringParams();
+    void InitializeStringPositions();
 
     static const unsigned int NUM_STRINGS = 8;
     static const unsigned int WORK_GROUP_SIZE = 32;
@@ -56,12 +57,11 @@ class ClothManager {
     constexpr static const float BASE_HEIGHT = 20.0f;
 
     struct {
-        float dt = 0.004;
-        float baseKs = 5500;
-        float deltaKs = 1000;
-        float kd = 0;
-        float restLength = 0.9;
+         float dt = 0.004, baseKs = 5500, deltaKs = 1000, kd = 0, restLength = 0.9, distanceBetweenMasses = 1;
+        //float dt = 0.0001, baseKs = 50000, deltaKs = 1000, kd = 0.3, restLength = 0.848, distanceBetweenMasses = 0.023; // Stephen's bell
     };
+
+    // Almost like a laser: 0.004, 66250, 2.27, 0.999
 
     static GLuint posSSbo;
     static GLuint velSSbo;

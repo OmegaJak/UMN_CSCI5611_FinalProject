@@ -188,7 +188,7 @@ int main(int argc, char* argv[]) {
     // https://learnopengl.com/In-Practice/Debugging
     GLint flags;
     glGetIntegerv(GL_CONTEXT_FLAGS, &flags);
-    if (flags & GL_CONTEXT_FLAG_DEBUG_BIT) {
+    if (flags & GL_CONTEXT_FLAG_DEBUG_BIT && false) {
         glEnable(GL_DEBUG_OUTPUT);
         glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
         glDebugMessageCallback(glDebugOutput, nullptr);
@@ -267,7 +267,8 @@ int main(int argc, char* argv[]) {
 
                 if (currentParameter != nullptr) *currentParameter += modAmount;
                 clothManager.GenerateStringParams();
-            } else if (windowEvent.key.keysym.sym >= SDLK_KP_1 && windowEvent.key.keysym.sym <= SDLK_KP_5) {
+                clothManager.InitializeStringPositions();
+            } else if (windowEvent.key.keysym.sym >= SDLK_KP_1 && windowEvent.key.keysym.sym <= SDLK_KP_6) {
                 // I'm sorry
                 switch (windowEvent.key.keysym.sym - SDLK_KP_1) {
                     case 0:
@@ -294,6 +295,11 @@ int main(int argc, char* argv[]) {
                         currentParameterBaseMod = 0.01;
                         currentParameterName = "restLength";
                         currentParameter = &clothManager.restLength;
+                        break;
+                    case 5:
+                        currentParameterBaseMod = 0.5;
+                        currentParameterName = "massDist";
+                        currentParameter = &clothManager.distanceBetweenMasses;
                         break;
                 }
             }
@@ -362,7 +368,8 @@ int main(int argc, char* argv[]) {
                   << framesPerSample << " frames "
                   << " | cameraPosition: " << Camera::getInstance().GetPosition() << " | dt: " << clothManager.dt
                   << ", baseKs: " << clothManager.baseKs << ", deltaKs: " << clothManager.deltaKs << ", kd: " << clothManager.kd
-                  << ", restLength: " << clothManager.restLength << " | currentlyEditing: " << currentParameterName;
+                  << ", restLength: " << clothManager.restLength << ", massDist: " << clothManager.distanceBetweenMasses
+                  << " | currentlyEditing: " << currentParameterName;
         SDL_SetWindowTitle(window, debugText.str().c_str());
 
         // Simulate using compute shader

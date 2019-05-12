@@ -90,38 +90,14 @@ vec3 getSpringAcceleration(vec3 p1, vec3 v1, float m1, vec3 p2, vec3 v2) {
     float force = springForce + dampForce;
 
     vec3 massOneAcc = 0.5 * force * toMassOneFromTwo / m1;
-
+	//massOneAcc += StringParameters[gl_WorkGroupID.x].kd * (v2 - v1);
     if (isInf(massOneAcc) || isNan(massOneAcc)) massOneAcc = vec3(0, 0, 0);
+
+	massOneAcc.y = 0;
+	//massOneAcc *= 1.01;
 
     return massOneAcc;
 }
-
-// RK4 integration
-//vec3 getAccelerationFromSpringConnection(uint massOne, uint massTwo) {
-//    if (massOne == BAD_INDEX || massTwo == BAD_INDEX) return vec3(0, 0, 0);
-//    vec3 originalPosition = Positions[massOne].xyz;
-//    vec3 originalVelocity = Velocities[massOne].xyz;
-//    float mass = MassParameters[massOne].mass;
-//    vec3 p2 = Positions[massTwo].xyz;
-//    vec3 v2 = Velocities[massTwo].xyz;
-//
-//    vec3 a1 = getSpringAcceleration(originalPosition, originalVelocity, mass, p2, v2);
-//    
-//    vec3 v_half = originalVelocity + a1 * 0.5 * dt;
-//    vec3 p_half = originalPosition + v_half * 0.5 * dt;
-//    vec3 a2 = getSpringAcceleration(p_half, v_half, mass, p2, v2);
-//   
-//    vec3 v_half2 = originalVelocity + a2 * 0.5 * dt;
-//    vec3 p_half2 = originalPosition + v_half2 * 0.5 * dt;
-//    vec3 a3 = getSpringAcceleration(p_half2, v_half2, mass, p2, v2);
-//   
-//    vec3 v_end = originalVelocity + a3 * dt;
-//    vec3 p_end = originalPosition + v_end * dt;
-//    vec3 a4 = getSpringAcceleration(p_end, v_end, mass, p2, v2);
-//
-//
-//    return (1.0 / 6.0) * (a1 + 2 * a2 + 2 * a3 + a4);
-//}
 
 // Midpoint
 vec3 getAccelerationFromSpringConnection(uint massOne, uint massTwo) {
@@ -132,6 +108,7 @@ vec3 getAccelerationFromSpringConnection(uint massOne, uint massTwo) {
     vec3 v2 = Velocities[massTwo].xyz;
 
     vec3 a = getSpringAcceleration(originalPosition, originalVelocity, MassParameters[gid].mass, p2, v2);
+	//return a;
     vec3 v_half = originalVelocity + a * 0.5 * StringParameters[gl_WorkGroupID.x].dt;
     vec3 p_half = originalPosition + v_half * 0.5 * StringParameters[gl_WorkGroupID.x].dt;
 
@@ -162,10 +139,13 @@ void main() {
 
 	uint samplesOffset = gl_WorkGroupID.x * numSamplesToGenerate;
 	for (int i = 0; i < numSamplesToGenerate; i++) {
-		CalculateForces();
-		barrier();
-		IntegrateForces();
-		barrier();
+		//for (int k = 0; k < 10; k++) {
+			CalculateForces();
+			barrier();
+			IntegrateForces();
+			barrier();
+		//}
+		//barrier();
 		if (gl_LocalInvocationIndex == 0) { // Only want one guy to do this per workgroup
 			uint offset = gl_WorkGroupID.x * gl_WorkGroupSize.x;
 			SamplesBuffer[i + samplesOffset] = .5 * Velocities[offset + StringParameters[gl_WorkGroupID.x].micPosition].z 
