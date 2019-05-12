@@ -16,7 +16,7 @@ const int VALUES_PER_TEXCOORD = 2;
 const int TEXCOORD_OFFSET = 3;
 
 const float CAMERA_ROTATION_SPEED = 0.5f;
-const float CAMERA_MOVE_SPEED = 0.1f;
+const float CAMERA_MOVE_SPEED = 0.8f;
 const float MAX_MOVE_SPEED = 2.0f * CAMERA_MOVE_SPEED;
 
 const float ABSOLUTE_TOLERANCE = 0.00001f;
