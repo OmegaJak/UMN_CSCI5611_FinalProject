@@ -193,7 +193,7 @@ void ClothManager::ExecuteComputeShader() {
     ready = true;
 }
 
-void ClothManager::Pluck(int stringIndex, float strength, int location) {
+void ClothManager::Pluck(int stringIndex, float strength, int method, int location) {
     assert(stringIndex < NUM_STRINGS);
 
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, posSSbo);
@@ -201,15 +201,31 @@ void ClothManager::Pluck(int stringIndex, float strength, int location) {
         (position *)glMapBufferRange(GL_SHADER_STORAGE_BUFFER, 0, TOTAL_NUM_MASSES * sizeof(position), GL_MAP_READ_BIT | GL_MAP_WRITE_BIT);
 
     double d = strength * stringParameters[stringIndex].restLength;  // scale pluck with string size
-    if (location == -1) location = (stringIndex * MASSES_PER_STRING) + (MASSES_PER_STRING / 2);
-    positions[location].z += d;
-    positions[location - 1].z += d / 2;
-    positions[location + 1].z += d / 2;
-    positions[location - 2].z += d / 2;
-    positions[location + 2].z += d / 2;
-    /*for (int i = 0; i < NUM_MASSES; i++) {
-        positions[i].z += 1;
-    }*/
+    if (location == -1) location = (MASSES_PER_STRING / 2);
+    location = location + stringIndex * MASSES_PER_STRING;
+    if (method == 0) {
+        positions[location].z += d;
+        positions[location - 1].z += d / 2;
+        positions[location + 1].z += d / 2;
+        positions[location - 2].z += d / 2;
+        positions[location + 2].z += d / 2;
+    } else if (method == 1) {
+        // Linear pluck
+        int minIndex = stringIndex * MASSES_PER_STRING;
+        int maxIndex = stringIndex * MASSES_PER_STRING + MASSES_PER_STRING;
+        for (int i = minIndex; i < maxIndex; i++) {
+            float displacement = 0;
+            if (i < location) {
+                displacement = (1.0f - (float(location - i) / float(location - minIndex))) * d;
+            } else if (i == location) {
+                displacement = d;
+            } else if (i > location) {
+                displacement = (1.0f - (float(i - location) / float(maxIndex - 1 - location))) * d;
+            }
+
+            positions[i].z += displacement;
+        }
+    }
 
     glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
 }

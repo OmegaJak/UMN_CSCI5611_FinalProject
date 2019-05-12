@@ -94,7 +94,6 @@ vec3 getSpringAcceleration(vec3 p1, vec3 v1, float m1, vec3 p2, vec3 v2) {
     if (isInf(massOneAcc) || isNan(massOneAcc)) massOneAcc = vec3(0, 0, 0);
 
 	massOneAcc.y = 0;
-	//massOneAcc *= 1.01;
 
     return massOneAcc;
 }

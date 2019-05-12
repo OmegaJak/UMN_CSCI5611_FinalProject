@@ -44,7 +44,7 @@ class ClothManager {
     void InitGL();
     void UpdateComputeParameters() const;
     void ExecuteComputeShader();
-    void Pluck(int stringIndex, float strength = 0.1, int location = -1);
+    void Pluck(int stringIndex, float strength = 0.1, int method = 0, int location = -1);
     void CopySamplesToAudioBuffer();
     void GenerateStringParams();
     void InitializeStringPositions();
@@ -57,7 +57,7 @@ class ClothManager {
     constexpr static const float BASE_HEIGHT = 20.0f;
 
     struct {
-         float dt = 0.004, baseKs = 5500, deltaKs = 1000, kd = 0, restLength = 0.9, distanceBetweenMasses = 1;
+         float dt = 0.004, baseKs = 5500, deltaKs = 1000, kd = 0, restLength = 0.9, distanceBetweenMasses = 1; 
         //float dt = 0.0001, baseKs = 50000, deltaKs = 1000, kd = 0.3, restLength = 0.848, distanceBetweenMasses = 0.023; // Stephen's bell
     };
 
