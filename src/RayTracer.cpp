@@ -45,8 +45,7 @@ bool RayTracer::Ray::hitWalls(float listenerDis, float travelDis) {
 	//return false;
 	auto& walls = Environment::getInstance().getWalls();
 	float minLength = listenerDis;
-	glm::vec3 hitNorm;
-
+	const glm::vec3* hitNorm = nullptr;
 	for(const auto& w:walls){
 		float dis = glm::dot(-w._normal, (w._position-_start));
 		float cosTheta = glm::dot(_dir,-w._normal);
@@ -59,21 +58,20 @@ bool RayTracer::Ray::hitWalls(float listenerDis, float travelDis) {
 				|| 2*abs(hitSurfacePointToSurfacePosition.y) >= w._length)
 				continue;
 			minLength = std::min(minLength, dis/cosTheta);
-			hitNorm = w._normal;
+			hitNorm = &w._normal;
 		}
 	}
 	
 	if(minLength < listenerDis) {
 		_start = _start + (minLength-0.001f)*_dir;
-		_dir = -glm::dot(hitNorm, _dir) * hitNorm;
-		const float ReflectScope = 2;
-		float r = ReflectScope*random();
-		_dir = glm::normalize(_dir);
+		_dir = _dir  - 2 * glm::dot(*hitNorm, _dir) * (*hitNorm);
+		//const float ReflectScope = 2;
+		//float r = ReflectScope*(2*rand()-(float)RAND_MAX)/(float)RAND_MAX;
+		//_dir = glm::normalize(_dir);
 		//std::cout<<_dir.x <<"y"<<_dir.y<<std::endl;
-		_dir.x += r*_dir.y;
-		_dir.y += r*_dir.x;
-		_dir = glm::normalize(_dir);
-		
+		//_dir.x += r*_dir.y;
+		//_dir.y += r*_dir.x;
+		//_dir = glm::normalize(_dir);
 		
 		trace(minLength + travelDis);
 		return true;

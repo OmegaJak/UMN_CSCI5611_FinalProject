@@ -4,9 +4,6 @@ class RayTracer {
    public:
     enum {
         RayNumber = 1024,
-        //ListenerRadius = 1,
-        // use one of them to stop raytrace
-        
 		SoundSpeed = 340,
     };
 	static const float ListenerRadius;

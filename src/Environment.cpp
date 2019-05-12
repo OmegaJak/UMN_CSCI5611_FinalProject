@@ -10,9 +10,11 @@ Environment::Environment() {
 }
 
 void Environment::UpdateAll() {
+	/*
     for (auto gameObject : _gameObjects) {
         gameObject.Update();
     }
+	*/
 	 for (auto gameObject : _walls) {
         gameObject.Update();
     }
@@ -23,8 +25,6 @@ void Environment::SetGravityCenterPosition(const glm::vec3& position) {
 }
 
 void Environment::CreateEnvironment() {
-    GameObject gameObject;
-
     // gameObject = GameObject(_cubeModel);  // ground
     // gameObject.SetTextureIndex(UNTEXTURED);
     // gameObject.SetColor(glm::vec3(0, 77 / 255.0, 26 / 255.0));
@@ -73,14 +73,13 @@ void Environment::CreateEnvironment() {
 	_walls.push_back(Wall(glm::vec3(2*WallScale,4*WallScale,0), glm::vec3(0,-1,0), 2*WallScale,_cubeModel));
 	_walls.push_back(Wall(glm::vec3(2*WallScale,-4*WallScale,0), glm::vec3(0,-1,0), 2*WallScale,_cubeModel));
 
-
 	_walls.push_back(Wall(glm::vec3(3*WallScale,3*WallScale,0), glm::vec3(1,0,0), 2*WallScale,_cubeModel));
 	_walls.push_back(Wall(glm::vec3(3*WallScale,-3*WallScale,0), glm::vec3(1,0,0), 2*WallScale,_cubeModel));
 	_walls.push_back(Wall(glm::vec3(3*WallScale,-WallScale,0), glm::vec3(1,0,0), 2*WallScale,_cubeModel));
 	*/
 	//_walls.push_back(Wall(glm::vec3(0,-WallScale,0), glm::vec3(0,1,0), 2*WallScale,_cubeModel));
 	//_walls.push_back(Wall(glm::vec3(2*WallScale,WallScale,0), glm::vec3(0,1,0), 2*WallScale,_cubeModel));
-
+	GameObject gameObject;
     gameObject = GameObject(_sphereModel);
     gameObject.SetTextureIndex(UNTEXTURED);
     gameObject.SetColor(glm::vec3(0, 0, 0));
