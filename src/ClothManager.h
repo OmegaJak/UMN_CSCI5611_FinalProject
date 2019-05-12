@@ -57,7 +57,8 @@ class ClothManager {
     constexpr static const float BASE_HEIGHT = 20.0f;
 
     struct {
-         float dt = 0.004, baseKs = 5500, deltaKs = 1000, kd = 0, restLength = 0.9, distanceBetweenMasses = 1; 
+         //float dt = 0.004, baseKs = 5500, deltaKs = 1000, kd = 0, restLength = 0.9, distanceBetweenMasses = 1; // Decent mid-pitch
+        float dt = 0.004, baseKs = 1500, deltaKs = 700, kd = 0, restLength = 0.9, distanceBetweenMasses = 1; // Decent low-pitch
         //float dt = 0.0001, baseKs = 50000, deltaKs = 1000, kd = 0.3, restLength = 0.848, distanceBetweenMasses = 0.023; // Stephen's bell
     };
 
