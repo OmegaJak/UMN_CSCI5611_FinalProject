@@ -15,6 +15,7 @@ bool SoundManager::printSamples = false;
 std::priority_queue<std::pair<float, unsigned int>> SoundManager::_q;
 
 extern float timePassed;
+extern bool isEchoOn;
 SoundManager::SoundManager(int samplesPerSecond) {
     InitSound(samplesPerSecond);
 }
@@ -75,9 +76,12 @@ void SoundManager::copyToSoundBuffer(float* samples, int numSamplesToGenerate) {
 }
 void SoundManager::sumSoundsOntime() {
 	static unsigned char count = 0;
-	count++;
-	count = count % 16;
-	if(count != 0) return;
+	if (isEchoOn) {
+		count++;
+		count = count % 16;
+		if(count != 0) return;
+	}
+
 
     static float tmpBuff[SampleNum];
     memset(tmpBuff, 0, sizeof(tmpBuff));

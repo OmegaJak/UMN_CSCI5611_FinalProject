@@ -6,6 +6,7 @@
 #include "minmax.h"
 #include "Environment.h"
 extern float timePassed;
+extern bool isEchoOn;
 glm::vec3 RayTracer::listenerPoint;
 const float RayTracer::ListenerRadius = 0.5;
 const float RayTracer::SoundLastingTime = 1.5;
@@ -32,7 +33,7 @@ float RayTracer::Ray::hitListenr() {
         // prune useless calculation
     } else if (glm::distance(_start + projecLength * _dir, listenerPoint) <= ListenerRadius){
 		//std::cout<<projecLength<<std::endl;
-		return projecLength;
+		return glm::distance(_start, listenerPoint);
 	}
 	
     return MaxListenDis;
@@ -42,7 +43,7 @@ float random(){
 	return (2*rand()-(float)RAND_MAX)/(float)RAND_MAX;
 }
 bool RayTracer::Ray::hitWalls(float listenerDis, float travelDis) {
-	//return false;
+	if(!isEchoOn) return false;
 	auto& walls = Environment::getInstance().getWalls();
 	float minLength = listenerDis;
 	const glm::vec3* hitNorm = nullptr;
@@ -83,9 +84,9 @@ void RayTracer::Ray::trace(const float TravelDis) {
 	if(TravelDis > MaxListenDis) return;
     float lDis = hitListenr();
 	
-    if (!hitWalls(lDis, TravelDis)){
-		//std::cout<<"lDis"<<lDis<<std::endl<<"TravelDis"<<TravelDis<<std::endl;
-		if(TravelDis + lDis < MaxListenDis) 
+    if (!hitWalls(lDis, TravelDis)
+		&& (TravelDis + lDis < MaxListenDis)) {
+	
 		SoundManager::addBuffer(timePassed + (TravelDis+lDis)/SoundSpeed, _index);
     }
 }

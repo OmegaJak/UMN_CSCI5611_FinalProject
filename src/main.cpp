@@ -54,7 +54,9 @@ int screenWidth = 1536;
 int screenHeight = 864;
 float timePassed = 0;
 
+
 bool fullscreen = false;
+bool isEchoOn = false;
 
 // srand(time(NULL));
 float rand01() {
@@ -255,6 +257,8 @@ int main(int argc, char* argv[]) {
                     clothManager.Pluck(index, 0.6);
                 } else if (windowEvent.type == SDL_KEYUP && windowEvent.key.keysym.sym == SDLK_k) {
                     SoundManager::togglePrintSamples();
+                } else if (windowEvent.type == SDL_KEYUP && windowEvent.key.keysym.sym == SDLK_m) {
+					isEchoOn = !isEchoOn;
                 }
             } else if (windowEvent.type == SDL_KEYDOWN) {
                 /*if (windowEvent.key.keysym.sym == SDLK_SPACE) {
