@@ -13,7 +13,7 @@ void Environment::UpdateAll() {
     for (auto gameObject : _gameObjects) {
         gameObject.Update();
     }
-	 for (auto gameObject : _walls) {
+    for (auto gameObject : _walls) {
         gameObject.Update();
     }
 }
@@ -33,27 +33,24 @@ void Environment::CreateEnvironment() {
     // gameObject.material_.specFactor_ = 0.2;
     //_gameObjects.push_back(gameObject);
 
-	/*
-    gameObject = GameObject(_cubeModel);  // reference person
-    gameObject.SetTextureIndex(TEX1);
-    gameObject.SetScale(1, 0, -3);
-    gameObject.SetPosition(glm::vec3(-25, 13, 1.5));
-    _gameObjects.push_back(gameObject);
-	*/
-	const float WallScale = 42;
-	_walls.push_back(Wall(glm::vec3(-WallScale,0,0), glm::vec3(1,0,0), 2*WallScale,_cubeModel));
-	//_walls.push_back(Wall(glm::vec3(WallScale,0,0), glm::vec3(-1,0,0), 2*WallScale,_cubeModel));
-	//_walls.push_back(Wall(glm::vec3(0,WallScale,0), glm::vec3(0,-1,0), 2*WallScale,_cubeModel));
-	//_walls.push_back(Wall(glm::vec3(0,-WallScale,0), glm::vec3(0,1,0), 2*WallScale,_cubeModel));
+    /*
+gameObject = GameObject(_cubeModel);  // reference person
+gameObject.SetTextureIndex(TEX1);
+gameObject.SetScale(1, 0, -3);
+gameObject.SetPosition(glm::vec3(-25, 13, 1.5));
+_gameObjects.push_back(gameObject);
+    */
+    const float WallScale = 42;
+    _walls.push_back(Wall(glm::vec3(-WallScale, 0, 0), glm::vec3(1, 0, 0), 2 * WallScale, _cubeModel));
+    //_walls.push_back(Wall(glm::vec3(WallScale,0,0), glm::vec3(-1,0,0), 2*WallScale,_cubeModel));
+    //_walls.push_back(Wall(glm::vec3(0,WallScale,0), glm::vec3(0,-1,0), 2*WallScale,_cubeModel));
+    //_walls.push_back(Wall(glm::vec3(0,-WallScale,0), glm::vec3(0,1,0), 2*WallScale,_cubeModel));
 
     gameObject = GameObject(_sphereModel);
     gameObject.SetTextureIndex(UNTEXTURED);
     gameObject.SetColor(glm::vec3(0, 0, 0));
-    gameObject.SetPosition(glm::vec3(0, 0, 0));
+    gameObject.SetPosition(glm::vec3(1000, 1000, 1000));
     gameObject.SetScale(8, 8, 8);
     _gameObjects.push_back(gameObject);
     _gravityCenterIndex = _gameObjects.size() - 1;
-
-
-
 }

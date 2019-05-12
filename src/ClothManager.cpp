@@ -29,16 +29,15 @@ bool ClothManager::ready = false;
 
 ClothManager::ClothManager() {
     srand(time(NULL));
-    for (int i = 0; i < 8; i++) {
-        stringParameters[i] = stringParams{0.008,              // dt
-                                           5000 + i * 5000.f,  // ks
-                                           0.0,                // kd
-                                           0.9,                // restLength
-                                           MASSES_PER_STRING / 2,
-                                           MASSES_PER_STRING / 3};
-    }
+    GenerateStringParams();
     globalSimParameters = simParams{SAMPLES_PER_FRAME};
     InitGL();
+}
+
+void ClothManager::GenerateStringParams() {
+    for (int i = 0; i < 8; i++) {
+        stringParameters[i] = stringParams{dt, baseKs + i * deltaKs, kd, restLength, MASSES_PER_STRING / 2, MASSES_PER_STRING / 3};
+    }
 }
 
 void ClothManager::InitGL() {

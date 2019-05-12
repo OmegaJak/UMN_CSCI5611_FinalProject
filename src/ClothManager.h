@@ -1,7 +1,7 @@
 #pragma once
+#include "Constants.h"
 #include "Model.h"
 #include "glad.h"
-#include "Constants.h"
 
 class Environment;
 
@@ -46,6 +46,7 @@ class ClothManager {
     void ExecuteComputeShader();
     void Pluck(int stringIndex, float strength = 0.1, int location = -1);
     void CopySamplesToAudioBuffer();
+    void GenerateStringParams();
 
     static const unsigned int NUM_STRINGS = 8;
     static const unsigned int WORK_GROUP_SIZE = 32;
@@ -53,6 +54,14 @@ class ClothManager {
     static const unsigned int TOTAL_NUM_MASSES = NUM_STRINGS * MASSES_PER_STRING;
     static const unsigned int GPU_SAMPLES_BUFFER_SIZE = NUM_STRINGS * SAMPLES_PER_FRAME;
     constexpr static const float BASE_HEIGHT = 20.0f;
+
+    struct {
+        float dt = 0.004;
+        float baseKs = 5500;
+        float deltaKs = 1000;
+        float kd = 0;
+        float restLength = 0.9;
+    };
 
     static GLuint posSSbo;
     static GLuint velSSbo;
