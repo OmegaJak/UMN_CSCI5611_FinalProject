@@ -255,6 +255,9 @@ void ClothManager::RenderParticles(float dt) {
     glUniform3fv(ShaderManager::ClothShader.Attributes.color, 1, glm::value_ptr(color));  // Update the color, if necessary
 
     glLineWidth(5);
-    glDrawArrays(GL_LINE_STRIP, 0, TOTAL_NUM_MASSES);
+    for (int i = 0; i < NUM_STRINGS; i++) {
+        int baseIndex = i * MASSES_PER_STRING;
+        glDrawArrays(GL_LINE_STRIP, baseIndex, MASSES_PER_STRING);
+    }
     glBindVertexArray(ShaderManager::EnvironmentShader.VAO);
 }
