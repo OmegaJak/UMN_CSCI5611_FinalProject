@@ -34,6 +34,7 @@ class Environment {
     Environment();
     void CreateEnvironment();
 
+    std::vector<GameObject> _stringHolders; // This is horrible and I'm sorry
     std::vector<GameObject> _gameObjects;
     std::vector<Wall> _walls;  // TODO: try to unify these two
     int _gravityCenterIndex;

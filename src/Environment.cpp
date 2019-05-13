@@ -11,6 +11,10 @@ Environment::Environment() {
 }
 
 void Environment::UpdateAll() {
+    for (auto gameObject : _stringHolders) {
+        gameObject.Update(); 
+    }
+
     if (isEchoOn) {
         for (auto gameObject : _gameObjects) {
             gameObject.Update();
@@ -105,17 +109,17 @@ _gameObjects.push_back(gameObject);
     // string holders
     gameObject = GameObject(_cubeModel);
     gameObject.SetTextureIndex(UNTEXTURED);
-    gameObject.SetColor(glm::vec3(0.5, 0.5, 0.5));
+    gameObject.SetColor(glm::vec3(0.258, 0.525, 0.9568));
     gameObject.SetScale(8, 0.5, 0.5);
     gameObject.SetPosition(glm::vec3(3.5, 0, 1));
-    _gameObjects.push_back(gameObject);
+    _stringHolders.push_back(gameObject);
 
     gameObject = GameObject(_cubeModel);
     gameObject.SetTextureIndex(UNTEXTURED);
-    gameObject.SetColor(glm::vec3(0.5, 0.5, 0.5));
+    gameObject.SetColor(glm::vec3(0.258, 0.525, 0.9568));
     gameObject.SetScale(8, 0.5, 0.5);
     gameObject.SetPosition(glm::vec3(3.5, 31, 1));
-    _gameObjects.push_back(gameObject);
+    _stringHolders.push_back(gameObject);
 
     gameObject = GameObject(_sphereModel);
     gameObject.SetTextureIndex(UNTEXTURED);
