@@ -257,7 +257,7 @@ int main(int argc, char* argv[]) {
                     gravityCenterDistance += modAmount;
                 } else if (windowEvent.key.keysym.sym >= SDLK_1 && windowEvent.key.keysym.sym <= SDLK_8) {
                     int index = windowEvent.key.keysym.sym - SDLK_1;  // Character math... I'm sorry
-                    clothManager.Pluck(index, 0.6, 0);
+                    clothManager.Pluck(index, 0.4, 0);
                 } else if (windowEvent.type == SDL_KEYUP && windowEvent.key.keysym.sym == SDLK_k) {
                     SoundManager::togglePrintSamples();
                 } else if (windowEvent.type == SDL_KEYUP && windowEvent.key.keysym.sym == SDLK_m) {
