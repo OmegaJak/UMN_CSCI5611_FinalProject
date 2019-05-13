@@ -1,6 +1,7 @@
 #include "ClothManager.h"
 #include "Environment.h"
 #include "Utils.h"
+extern bool isEchoOn;
 
 Environment::Environment() {
     _cubeModel = new Model("models/cube.txt");
@@ -10,11 +11,13 @@ Environment::Environment() {
 }
 
 void Environment::UpdateAll() {
-    for (auto gameObject : _gameObjects) {
-        gameObject.Update();
-    }
-    for (auto gameObject : _walls) {
-        gameObject.Update();
+    if (isEchoOn) {
+        for (auto gameObject : _gameObjects) {
+            gameObject.Update();
+        }
+        for (auto gameObject : _walls) {
+            gameObject.Update();
+        }
     }
 }
 
