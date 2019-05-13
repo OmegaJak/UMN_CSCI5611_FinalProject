@@ -373,7 +373,7 @@ int main(int argc, char* argv[]) {
                   << " | cameraPosition: " << Camera::getInstance().GetPosition() << " | dt: " << clothManager.dt
                   << ", baseKs: " << clothManager.baseKs << ", deltaKs: " << clothManager.deltaKs << ", kd: " << clothManager.kd
                   << ", restLength: " << clothManager.restLength << ", massDist: " << clothManager.distanceBetweenMasses
-                  << " | currentlyEditing: " << currentParameterName;
+                  << " | currentlyEditing: " << currentParameterName << " | echo: " << isEchoOn;
         SDL_SetWindowTitle(window, debugText.str().c_str());
 
         // Simulate using compute shader

@@ -75,25 +75,18 @@ void SoundManager::copyToSoundBuffer(float* samples, int numSamplesToGenerate) {
     }
 }
 void SoundManager::sumSoundsOntime() {
-	static unsigned char count = 0;
-	if (isEchoOn) {
-		count++;
-		count = count % 8;
-		if(count != 0) return;
-	}
-
     static float tmpBuff[SampleNum];
     memset(tmpBuff, 0, sizeof(tmpBuff));
     while (!_q.empty() && -_q.top().first < timePassed) {
         unsigned int index = _q.top().second.first;
-		unsigned int step = _q.top().second.second;
+        unsigned int step = _q.top().second.second;
         // printf("Get buffer Index %u\n",  index);
         _q.pop();
-        for (int i = 0; i < SampleNum; ++i) tmpBuff[i] += soundBuffs[index][i]/step;
+        for (int i = 0; i < SampleNum; ++i) tmpBuff[i] += soundBuffs[index][i] / step;
         --_SmartBuff[index];
     }
     // TODO: figure out a decent way for anti distortion
-    //for (int i = 0; i < SampleNum; ++i) tmpBuff[i] *= 0.4f;
+    // for (int i = 0; i < SampleNum; ++i) tmpBuff[i] *= 0.2f;
     copyToSoundBuffer(tmpBuff, SampleNum);
 }
 
